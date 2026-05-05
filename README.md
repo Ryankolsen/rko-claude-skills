@@ -5,7 +5,8 @@ A curated library of Claude Code skills for software development workflows.
 ## Installation
 
 ```
-/plugin install github:ryankolsen/rko-claude-skills
+/marketplace add github:Ryankolsen/rko-claude-skills
+/plugin install rko-claude-skills@rko-claude-skills
 ```
 
 ## Skills

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "rko-claude-skills",
+  "description": "Ryan Kolsen's curated library of Claude Code skills for software development workflows",
+  "owner": {
+    "name": "Ryan Kolsen",
+    "email": "ryankolsen@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "rko-claude-skills",
+      "description": "General and mobile skills for PRD workflows, implementation planning, debugging, architecture review, git guardrails, and Expo/React Native development.",
+      "author": {
+        "name": "Ryan Kolsen"
+      },
+      "category": "development",
+      "source": "./plugins/rko-claude-skills"
+    }
+  ]
+}
