@@ -1,2 +1,6 @@
 .idea/
 .DS_Store
+node_modules/
+
+# Local Claude Code settings; the skills beside it are part of the repo.
+.claude/settings.local.json
