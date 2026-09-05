@@ -48,7 +48,6 @@ skills claiming one job make that pick a coin toss.
 | Skill | Description |
 |-------|-------------|
 | `do-work` | Execute a unit of work end-to-end: plan, implement, validate, commit |
-| `implement` | Implement work described by a spec or set of tickets |
 | `tdd` | Test-driven development: what a good test is, seams, and the red-green loop |
 | `prototype` | Build a throwaway prototype to answer a design question |
 
