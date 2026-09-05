@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "rko-claude-skills",
-      "description": "General and mobile skills for PRD workflows, implementation planning, debugging, architecture review, git guardrails, and Expo/React Native development.",
+      "description": "Stack-agnostic skills for PRD workflows, implementation planning, TDD, debugging, architecture review, code review, and git guardrails. Skills delegate to reserved skill names your repository supplies, so they work on any stack.",
       "author": {
         "name": "Ryan Kolsen"
       },

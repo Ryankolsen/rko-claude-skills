@@ -2,6 +2,11 @@
 
 A curated library of Claude Code skills for software development workflows.
 
+Every skill here is **stack-agnostic**. Nothing names a package manager or a
+build command; skills that need to run something delegate to a reserved skill
+name the consuming repository supplies. See
+[CONVENTIONS.md](plugins/rko-claude-skills/CONVENTIONS.md).
+
 ## Installation
 
 ```
@@ -9,30 +14,80 @@ A curated library of Claude Code skills for software development workflows.
 /plugin install rko-claude-skills@rko-claude-skills
 ```
 
+## What your repository supplies
+
+| Reserved name | Purpose |
+|-------|-------------|
+| `run-tests` | Tests only — fast enough to call on every red-green cycle |
+| `verify` | The full pre-commit gate: typecheck, lint, tests, build |
+
+A skill that cannot find one works down a fixed fallback chain — repository
+documentation, then auto-detection, then asking — and never guesses a command.
+
 ## Skills
 
-### General
+### Planning and specification
+
+| Skill | Description |
+|-------|-------------|
+| `write-a-prd` | Interview, explore the codebase, and produce a PRD as a GitHub issue |
+| `to-spec` | Turn the current conversation into a spec, with no interview |
+| `prd-to-plan` | Break a PRD into phased tracer-bullet slices as a GitHub issue |
+| `prd-to-issues` | Break a PRD into independently-grabbable GitHub issues |
+| `grill-me` | Interview relentlessly about a plan until reaching shared understanding |
+| `research` | Investigate a question against primary sources and write up the findings |
+
+### Building
 
 | Skill | Description |
 |-------|-------------|
 | `do-work` | Execute a unit of work end-to-end: plan, implement, validate, commit |
-| `write-a-prd` | Guide through creating a product requirements document |
-| `prd-to-plan` | Turn a PRD into a multi-phase implementation plan as a GitHub issue |
-| `prd-to-issues` | Break a PRD into individual GitHub issues |
-| `grill-me` | Interview relentlessly about a plan or design until reaching shared understanding |
-| `debug` | Systematically debug UI and component bugs |
-| `write-a-skill` | Create new Claude Code skills with proper structure |
-| `improve-codebase-architecture` | Find architectural improvement opportunities |
-| `pnpm-not-found` | Fix "pnpm command not found" errors via corepack |
-| `git-guardrails-claude-code` | Set up hooks to block dangerous git commands before they execute |
+| `implement` | Implement work described by a spec or set of tickets |
+| `tdd` | Test-driven development: what a good test is, seams, and the red-green loop |
+| `prototype` | Build a throwaway prototype to answer a design question |
 
-### Mobile (React Native / Expo)
+### Diagnosis
 
 | Skill | Description |
 |-------|-------------|
-| `start-emulator` | Start iOS Simulator or Android emulator with local Supabase |
-| `apply-theme-colors` | Apply colors correctly using a two-layer theme system |
-| `build-new-version` | Check versioning and trigger an EAS production build |
+| `debug` | Debug UI and component bugs via inspection, logging, and regression tests |
+| `diagnosing-bugs` | Diagnosis loop for hard bugs and performance regressions |
+
+### Design and architecture
+
+| Skill | Description |
+|-------|-------------|
+| `codebase-design` | Shared vocabulary for designing deep modules, interfaces, and seams |
+| `improve-codebase-architecture` | Find opportunities to deepen shallow modules |
+| `domain-modeling` | Build and sharpen a project's domain model, CONTEXT.md, and ADRs |
+
+### Review and version control
+
+| Skill | Description |
+|-------|-------------|
+| `code-review` | Review a diff on two axes: repo standards, and fidelity to the spec |
+| `commit-message` | Group pending changes into logical commits and write each message |
+| `resolving-merge-conflicts` | Resolve an in-progress merge or rebase conflict |
+| `git-guardrails-claude-code` | Hooks that block dangerous git commands before they execute |
+
+### Meta
+
+| Skill | Description |
+|-------|-------------|
+| `write-a-skill` | Create new skills with proper structure and progressive disclosure |
+| `teach` | Teach a new skill or concept within this workspace |
+| `handoff` | Compact the conversation into a handoff document for another agent |
+
+## Development
+
+```
+npm test
+```
+
+The suite is a validator over the plugin tree — it checks frontmatter, that
+referenced commands and links resolve, that no generic skill names a package
+manager, and that this README matches the skills that actually exist. Node 18+,
+no dependencies.
 
 ## License
 
