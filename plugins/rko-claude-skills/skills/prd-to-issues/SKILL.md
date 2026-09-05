@@ -76,7 +76,7 @@ A concise description of this vertical slice. Describe the end-to-end behavior, 
 - [ ] Criterion 1
 - [ ] Criterion 2
 - [ ] Criterion 3
-- [ ] All tests pass (`npm test`)
+- [ ] All tests pass (the project's `verify` skill)
 
 ## Blocked by
 

@@ -99,7 +99,7 @@ Test checklist:
 - [ ] One test for the happy path (normal selection works)
 - [ ] One test per edge case introduced by the fix (e.g. free-text fallback still works)
 
-Run `pnpm run typecheck && pnpm run test` — all must pass.
+Invoke the project's `verify` skill — everything it runs must pass.
 
 ### 8. Remove logging and commit
 
