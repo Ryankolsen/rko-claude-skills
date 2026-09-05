@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { loadSkills } from "./lib/skills.js";
+import { loadSkills } from "../lib/skills.js";
 
 test("every skill has parseable frontmatter with a name and description", () => {
   const skills = loadSkills();

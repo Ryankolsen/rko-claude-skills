@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { loadSkills } from "./lib/skills.js";
+import { loadSkills } from "../lib/skills.js";
 
 /**
  * Claude Code commands that are not skills in this plugin. Referencing one is
