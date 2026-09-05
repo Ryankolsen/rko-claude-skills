@@ -1,0 +1,11 @@
+{
+  "name": "rko-claude-skills",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Validator for the rko-claude-skills plugin tree.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "license": "MIT"
+}
