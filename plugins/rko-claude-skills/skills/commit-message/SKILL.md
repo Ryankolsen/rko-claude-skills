@@ -1,6 +1,8 @@
 ---
 name: commit-message
 description: Split pending changes into logically separate commits and write each commit message in Conventional-Commits style (type, imperative subject, why-focused body). Use when the user asks to commit changes, clean up a commit, or write/fix a commit message.
+domain: commit-authoring
+disable-model-invocation: false
 ---
 
 # Commit Message

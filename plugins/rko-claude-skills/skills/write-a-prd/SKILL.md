@@ -1,6 +1,8 @@
 ---
 name: write-a-prd
 description: Guide through creating a product requirements document — interviews the user, explores the codebase, and outputs a structured PRD as a GitHub issue. Use when user wants to create a PRD or plan a new feature.
+domain: prd-authoring
+disable-model-invocation: true
 ---
 
 This skill will be invoked when the user wants to create a PRD. You should go through the steps below. You may skip steps if you don't consider them necessary.

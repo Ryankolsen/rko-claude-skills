@@ -1,6 +1,8 @@
 ---
 name: prd-to-plan
 description: Turn a PRD into a multi-phase implementation plan using tracer-bullet vertical slices, submitted as a GitHub issue. Use when user wants to break down a PRD, create an implementation plan, plan phases from a PRD, or mentions "tracer bullets".
+domain: prd-to-plan
+disable-model-invocation: true
 ---
 
 # PRD to Plan

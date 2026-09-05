@@ -45,6 +45,21 @@ Write it so it is unambiguous to a reader and checkable by the validator:
 
 The validator checks that every name delegated to this way is either a reserved name or a skill that exists, which is what catches a `run-test` typo before it reaches a repo that has no such skill.
 
+## Skill classification
+
+Every skill declares two things beyond its name and description.
+
+**`domain`** — the job it claims, as a short slug (`bug-diagnosis`, `commit-authoring`). It is what makes overlap checkable instead of a matter of opinion.
+
+**`disable-model-invocation`** — which pool the skill sits in, stated explicitly rather than left to a default:
+
+- **`false` — auto-invocable.** Claude may reach for it based on the conversation. Reserve this for skills that answer a situation the user is already in: a bug was reported, a merge conflict is open, a commit is being written.
+- **`true` — workflow.** The skill runs only when invoked by name. Use it for anything deliberate, expensive, or outward-facing: publishing issues, spawning background agents, interviewing the user, rewriting architecture.
+
+**At most one auto-invocable skill per domain.** An agent chooses from descriptions alone, so two skills claiming the same job make the choice arbitrary. Workflow skills are exempt — being chosen by name, they cannot be mis-selected — which is why two skills may share a domain if both are workflow.
+
+When in doubt, choose workflow. A skill that fails to trigger is a minor annoyance; one that triggers unbidden and publishes something is not.
+
 ## Adding a reserved name
 
 Don't, unless a generic capability actually needs it. Every name is one more thing a repository can fail to supply or misspell, and an unsupplied name costs more than an inlined command — it fails at a distance, inside an agent, with a confusing message.
