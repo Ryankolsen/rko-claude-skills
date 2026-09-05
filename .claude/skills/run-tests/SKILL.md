@@ -27,4 +27,6 @@ The suite is a validator over the plugin tree. Every rule is one test:
 
 Each failure names the rule and lists the offending files. The assertion is a diff against an empty list, so the reported entries *are* the violations — fix those files rather than adjusting the test.
 
-Add a rule by adding a `test/*.test.js` file; shared skill discovery and frontmatter parsing live in `test/lib/skills.js`.
+Add a rule by adding a `test/*.test.js` file; shared skill discovery and frontmatter parsing live in `lib/skills.js`.
+
+Keep test files directly in `test/` — discovery uses a shell-expanded glob, so a test nested in a subdirectory would be skipped silently.
