@@ -24,6 +24,17 @@ name the consuming repository supplies. See
 A skill that cannot find one works down a fixed fallback chain — repository
 documentation, then auto-detection, then asking — and never guesses a command.
 
+## Agents
+
+| Agent | Description |
+|-------|-------------|
+| `agent-architect` | Design a new agent: inventory existing skills, research prior art, return a build spec |
+| `skill-author` | Draft a SKILL.md from an approved spec, self-checked against the write-a-skill rubric |
+
+Agent files are deliberately thin — identity, a tool allowlist, and what they
+delegate to. Procedure lives in skills, so the same procedure runs whether it is
+invoked in a subagent or the main thread.
+
 ## Skills
 
 Each skill declares a `domain` — the job it claims — and whether it is
