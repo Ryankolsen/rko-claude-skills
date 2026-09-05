@@ -1,117 +1,158 @@
 ---
 name: debug
-description: Systematically debug UI and component bugs using code inspection, targeted logging, and regression tests. Use when the user reports a visual glitch, interaction bug, or unexpected behavior and wants to find and fix the root cause. Covers layout bugs, event-handler sequencing issues, state resets, third-party library quirks, and React lifecycle surprises.
+description: Systematic diagnosis loop for bugs and performance regressions — build a tight feedback loop, reproduce, minimise, hypothesise, instrument, fix, lock in with a regression test. Use when the user reports something broken, throwing, failing, slow, or visually wrong, says "debug this" or "diagnose this", or wants the root cause of a bug found and fixed.
+domain: bug-diagnosis
+disable-model-invocation: false
 ---
 
 # Debug
 
-Diagnose a bug systematically: read the code, form a hypothesis, instrument if needed, fix, then lock it in with a regression test.
+A discipline for hard bugs. Skip phases only when explicitly justified.
 
-## Workflow
+When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
-### 1. Understand the bug
+## Redact
 
-Collect from the user:
-- What they expected vs. what actually happened
-- Screenshots or screen recordings if it's visual
-- Reproduction steps (which screen, which action)
+This skill has you show commands, outputs and captured artifacts. **Redact every secret first**: write `<REDACTED>` in its place. Build loops against env vars, so the credential stays in the environment rather than in what you show. Captured artifacts carry auth headers: quote only the lines that carry the signal.
 
-### 2. Read the relevant code
+If the redacted output is not enough to diagnose the bug, say so and ask the user.
 
-Find and read the component(s) involved. Look for:
-- Layout constraints that could cause sizing/overflow issues (missing `flexGrow: 0`, unconstrained `ScrollView`, etc.)
-- Event handler order — which callbacks fire and in what sequence
-- State that could be reset by a `useEffect` with the wrong dependency
-- Third-party component props that might have surprising side effects
+## Phase 0: Collect the report
 
-### 3. Form a hypothesis before adding logs
+Before anything, get from the user:
 
-State the suspected root cause clearly. If the code reading is sufficient to confirm it, skip straight to the fix. Only instrument when the call order or timing is genuinely ambiguous.
+- What they expected versus what actually happened
+- Reproduction steps: which entry point, which action, which inputs
+- Artifacts if the symptom is visual or intermittent: screenshots, a recording, log excerpts
 
-**Examples where code alone is enough:**
-- A horizontal `ScrollView` with no height constraint inside a flex container → fix is `style={{ flexGrow: 0 }}`
-- A `value` prop change triggering a `useEffect` that resets local state
+You are looking for the **user's exact symptom**, because Phase 2 checks the loop reproduces that and not something nearby. If the report is vague, ask now — a precise symptom is what makes a loop red-capable.
 
-**Examples where logging is needed:**
-- Unclear whether a library callback fires before or after another (e.g. `onBlur` vs `onChange`)
-- Uncertain which render cycle is clobbering state
+## Phase 1: Build a feedback loop
 
-### 4. Add targeted logging (if needed)
+**This is the skill.** Everything else is mechanical. If you have a **tight** pass/fail signal for the bug (one that goes red on _this_ bug), you will find the cause; bisection, hypothesis-testing, and instrumentation all just consume it. If you don't have one, no amount of staring at code will save you.
 
-Instrument at the key decision points — not everywhere. Standard targets:
+Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
 
-```ts
-// Component renders
-console.log(`[ComponentName] render — value="${value}" localState="${localState}"`);
+### Ways to construct one, in roughly this order
 
-// useEffect
-console.log(`[ComponentName] useEffect — dep="${dep}" isOpen=${isOpenRef.current}`);
+1. **Failing test** at whatever seam reaches the bug: unit, integration, e2e.
+2. **Curl / HTTP script** against a running dev server.
+3. **CLI invocation** with a fixture input, diffing stdout against a known-good snapshot.
+4. **Headless browser script** (Playwright / Puppeteer) that drives the UI and asserts on DOM/console/network.
+5. **Replay a captured trace.** Save a real network request / payload / event log to disk; replay it through the code path in isolation.
+6. **Throwaway harness.** Spin up a minimal subset of the system (one service, mocked deps) that exercises the bug code path with a single function call.
+7. **Property / fuzz loop.** If the bug is "sometimes wrong output", run 1000 random inputs and look for the failure mode.
+8. **Bisection harness.** If the bug appeared between two known states (commit, dataset, version), automate "boot at state X, check, repeat" so you can `git bisect run` it.
+9. **Differential loop.** Run the same input through old-version vs new-version (or two configs) and diff outputs.
+10. **HITL bash script.** Last resort. If a human must click, drive _them_ with `scripts/hitl-loop.template.sh` so the loop is still structured. Captured output feeds back to you.
 
-// Event handlers
-console.log(`[ComponentName] onSelect item="${item.value}"`);
-console.log(`[ComponentName] onSearchChange text="${text}" justSelected=${justSelectedRef.current}`);
+Build the right feedback loop, and the bug is 90% fixed.
 
-// Library lifecycle events
-console.log(`[ComponentName] onFocus (opened)`);
-console.log(`[ComponentName] onBlur (closed)`);
-```
+### Tighten the loop
 
-Ask the user to reload the app, reproduce the bug, and paste the Metro console output.
+Treat the loop as a product. Once you have _a_ loop, **tighten** it:
 
-### 5. Interpret the logs
+- Can I make it faster? (Cache setup, skip unrelated init, narrow the test scope.)
+- Can I make the signal sharper? (Assert on the specific symptom, not "didn't crash".)
+- Can I make it more deterministic? (Pin time, seed RNG, isolate filesystem, freeze network.)
 
-Read the sequence carefully. Look for:
-- A callback firing in an unexpected order (e.g. library clearing search text *after* selection fires your `onChange`)
-- A `useEffect` running with stale state because a ref wasn't updated yet
-- A parent re-render passing a new prop that overwrites local state at the wrong time
+A 30-second flaky loop is barely better than no loop; a 2-second deterministic one is tight, a debugging superpower.
 
-State the root cause as a single sentence before writing the fix.
+### Non-deterministic bugs
 
-### 6. Fix
+The goal is not a clean repro but a **higher reproduction rate**. Loop the trigger 100×, parallelise, add stress, narrow timing windows, inject sleeps. A 50%-flake bug is debuggable; 1% is not, so keep raising the rate until it's debuggable.
 
-Make the minimal change. Common patterns from this codebase:
+### When you genuinely cannot build a loop
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Component grows to fill screen when list is empty | `ScrollView` unconstrained in flex parent | `style={{ flexGrow: 0 }}` |
-| Selected value disappears after pick | Library fires `onChangeText("")` post-selection, wiping form value | `justSelectedRef` guard — skip empty-string event immediately after selection |
-| Selected value disappears after pick | `data` prop empties during loading, Dropdown can't match value | Decouple search query state from form value |
-| `useEffect` resets state unexpectedly | `isOpen` ref is false when it should be true | Check library focus/blur event timing with logs |
+Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
 
-### 7. Write a regression test
+### Completion criterion: a tight loop that goes red
 
-**Always write a test.** The mock must simulate the exact behavior that caused the bug — not a simplified happy path.
+Phase 1 is done when the loop is **tight** and **red-capable**: you can name **one command** (a script path, a test invocation, a curl) that you have **already run at least once** (show the invocation and its output, redacted), and that is:
 
-```ts
-// Good: mock fires onChangeText("") after onChange, exactly like the real library
-onPress={() => {
-  onChange(item);
-  onChangeText?.('');   // ← the quirk we're guarding against
-  onBlur?.();
-}}
+- [ ] **Red-capable**: it drives the actual bug code path and asserts the **user's exact symptom**, so it can go red on this bug and green once fixed. Not "runs without erroring"; it must be able to _catch this specific bug_.
+- [ ] **Deterministic**: same verdict every run (flaky bugs: a pinned, high reproduction rate, per above).
+- [ ] **Fast**: seconds, not minutes.
+- [ ] **Agent-runnable**: you can run it unattended; a human in the loop only via `scripts/hitl-loop.template.sh`.
 
-// Bad: mock only calls onChange — doesn't reproduce the bug
-onPress={() => onChange(item)}
-```
+If you catch yourself reading code to build a theory before this command exists, **stop: jumping straight to a hypothesis is the exact failure this skill prevents.** No red-capable command, no Phase 2.
 
-Test checklist:
-- [ ] One test that would have caught this bug before the fix
-- [ ] One test for the happy path (normal selection works)
-- [ ] One test per edge case introduced by the fix (e.g. free-text fallback still works)
+## Phase 2: Reproduce + minimise
 
-Invoke the project's `verify` skill — everything it runs must pass.
+Run the loop. Watch it go red as the bug appears.
 
-### 8. Remove logging and commit
+Confirm:
 
-Strip every `console.log` added in step 4. Then commit with a message that covers:
-1. What the symptom was
-2. The root cause (one sentence)
-3. What the fix does
+- [ ] The loop produces the failure mode the **user** described, not a different failure that happens to be nearby. Wrong bug = wrong fix.
+- [ ] The failure is reproducible across multiple runs (or, for non-deterministic bugs, reproducible at a high enough rate to debug against).
+- [ ] You have captured the exact symptom (error message, wrong output, slow timing) so later phases can verify the fix actually addresses it.
 
-```
-Fix [component] [symptom]
+### Minimise
 
-Root cause: [one sentence].
-Fix: [what changed and why].
-Adds regression test for [specific behavior].
-```
+Once it's red, shrink the repro to the **smallest scenario that still goes red**. Cut inputs, callers, config, data, and steps **one at a time**, re-running the loop after each cut, and keep only what's load-bearing for the failure.
+
+Why bother: a minimal repro shrinks the hypothesis space in Phase 3 (fewer moving parts left to suspect) and becomes the clean regression test in Phase 5.
+
+Done when **every remaining element is load-bearing**: removing any one of them makes the loop go green.
+
+Do not proceed until you have reproduced **and** minimised.
+
+## Phase 3: Hypothesise
+
+Generate **3–5 ranked hypotheses** before testing any of them. Single-hypothesis generation anchors on the first plausible idea.
+
+Each hypothesis must be **falsifiable**: state the prediction it makes.
+
+> Format: "If <X> is the cause, then <changing Y> will make the bug disappear / <changing Z> will make it worse."
+
+If you cannot state the prediction, the hypothesis is a vibe: discard or sharpen it.
+
+**Show the ranked list to the user before testing.** They often have domain knowledge that re-ranks instantly ("we just deployed a change to #3"), or know hypotheses they've already ruled out. Cheap checkpoint, big time saver. Don't block on it; proceed with your ranking if the user is AFK.
+
+## Phase 4: Instrument
+
+Each probe must map to a specific prediction from Phase 3. **Change one variable at a time.**
+
+Tool preference:
+
+1. **Debugger / REPL inspection** if the env supports it. One breakpoint beats ten logs.
+2. **Targeted logs** at the boundaries that distinguish hypotheses.
+3. Never "log everything and grep".
+
+**Tag every debug log** with a unique prefix, e.g. `[DEBUG-a4f2]`. Cleanup at the end becomes a single grep. Untagged logs survive; tagged logs die.
+
+**Perf branch.** For performance regressions, logs are usually wrong. Instead: establish a baseline measurement (timing harness, `performance.now()`, profiler, query plan), then bisect. Measure first, fix second.
+
+## Phase 5: Fix + regression test
+
+Write the regression test **before the fix**, but only if there is a **correct seam** for it.
+
+A correct seam is one where the test exercises the **real bug pattern** as it occurs at the call site. If the only available seam is too shallow (single-caller test when the bug needs multiple callers, unit test that can't replicate the chain that triggered the bug), a regression test there gives false confidence.
+
+**If no correct seam exists, that itself is the finding.** Note it. The codebase architecture is preventing the bug from being locked down. Flag this for the next phase.
+
+If a correct seam exists:
+
+**A mock must reproduce the quirk, not the happy path.** If the bug came from a dependency behaving surprisingly — firing callbacks in an unexpected order, emitting an extra event, returning an empty payload mid-flight — the mock has to do that surprising thing. A mock that only models the well-behaved case cannot fail on this bug, so the test it supports proves nothing.
+
+1. Turn the minimised repro into a failing test at that seam.
+2. Watch it fail.
+3. Apply the fix.
+4. Watch it pass.
+5. Re-run the Phase 1 feedback loop against the original (un-minimised) scenario.
+
+## Phase 6: Cleanup
+
+Required before declaring done:
+
+- [ ] Original repro no longer reproduces (re-run the Phase 1 loop)
+- [ ] Regression test passes (or absence of seam is documented)
+- [ ] All `[DEBUG-...]` instrumentation removed (`grep` the prefix)
+- [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)
+- [ ] The hypothesis that turned out correct is stated in the commit / PR message, so the next debugger learns
+
+The commit message should cover three things, in this order:
+
+1. The symptom, as the user described it
+2. The root cause, in one sentence
+3. What the fix does, and what the regression test locks in

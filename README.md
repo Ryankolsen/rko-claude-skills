@@ -26,6 +26,12 @@ documentation, then auto-detection, then asking — and never guesses a command.
 
 ## Skills
 
+Each skill declares a `domain` — the job it claims — and whether it is
+**auto-invocable** (Claude may reach for it from context) or a **workflow**
+skill (you invoke it by name). Only one skill may claim a domain in the
+auto-invocable pool, because an agent picks from descriptions alone and two
+skills claiming one job make that pick a coin toss.
+
 ### Planning and specification
 
 | Skill | Description |
@@ -50,8 +56,7 @@ documentation, then auto-detection, then asking — and never guesses a command.
 
 | Skill | Description |
 |-------|-------------|
-| `debug` | Debug UI and component bugs via inspection, logging, and regression tests |
-| `diagnosing-bugs` | Diagnosis loop for hard bugs and performance regressions |
+| `debug` | Feedback-loop diagnosis: reproduce, minimise, hypothesise, instrument, fix |
 
 ### Design and architecture
 
