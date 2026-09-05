@@ -19,42 +19,20 @@ If the task has not already been planned, create a plan for it.
 
 ### 3. Implement
 
-**For backend code**: use strict red/green/refactor, one test at a time in a tracer-bullet style. This means literally one test → one implementation change → verified green, before writing the next test.
+**For backend code**: strict red/green/refactor, one test at a time in tracer-bullet style — one test → one implementation change → verified green, before the next test is written.
 
-#### Tracer bullet test order
+Invoke the `tdd` skill for the rules of that loop, what makes a test worth keeping, and the anti-patterns to avoid. It owns that material; repeating it here would only let the two copies drift.
 
-Order tests from thinnest vertical slice to widest:
-
-1. **Slice 1 — Thinnest end-to-end:** Prove the core wiring works. One assertion on the most essential outcome (e.g., "a record was created with the right type"). Write this test, run it (red), write the minimum implementation to make it pass (green).
-2. **Slice 2 — Widen the content:** Verify the details are correct (e.g., message format, field values). Write this test, run it (red), adjust implementation if needed (green).
-3. **Slice 3+ — Widen further:** Add one new dimension per test — fan-out to multiple recipients, negative/error cases, edge cases with different inputs. Each time: write one test, run it (red), implement (green).
-
-#### Red/green cycle discipline
-
-- **Write exactly ONE test.** Do NOT write multiple tests before running them.
-- **Run the test suite** after writing each test to confirm it fails (red).
-- **Write the minimum code** to make that one test pass (green).
-- **Run the test suite again** to confirm it passes.
-- **Then and only then**, write the next test.
-- After all slices are done, refactor if needed while keeping tests green.
-
-#### What NOT to do
-
-- Do not write all tests upfront and then implement everything at once — this is batch, not tracer bullet.
-- Do not write a test that asserts on 5 different things when you haven't proven the basic wiring works yet.
-- Do not skip running the test between red and green — the failing run is what proves the test has value.
+Between red and green, invoke the project's `run-tests` skill. It is tests-only, so it is safe to call on every cycle.
 
 **For frontend code**: implement directly without TDD.
 
 ### 4. Validate
 
-Run the feedback loops and fix any issues. Repeat until both pass cleanly.
+Invoke the project's `verify` skill and fix what it reports. Repeat until it passes cleanly.
 
-```
-pnpm run typecheck
-pnpm run test
-```
+If the repository has no `verify` skill, work down the fallback chain in [CONVENTIONS.md](../../CONVENTIONS.md) — documentation, then auto-detection, then ask. Never guess a command: a made-up command that fails produces a false finding, which is worse than admitting you could not tell.
 
 ### 5. Commit
 
-Once typecheck and tests pass, commit the work.
+Once `verify` passes, commit the work.
