@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
+**Locating the issue tracker and label vocabulary.** If `docs/agents/issue-tracker.md` exists, follow it. Otherwise detect them rather than blocking: check the git remote and whether `gh` is authenticated for a GitHub repo, or `glab` for GitLab, and read the existing labels (`gh label list`) to learn the triage vocabulary this project actually uses. If neither resolves, ask the user where to publish. Never invent a label that does not exist — if no triage label fits, publish without one and say so.
 
 ## Process
 

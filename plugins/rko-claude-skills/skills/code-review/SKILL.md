@@ -10,7 +10,7 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
-The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
+**Locating the issue tracker.** If `docs/agents/issue-tracker.md` exists, follow it. Otherwise detect the tracker rather than blocking: check the git remote and whether `gh` is authenticated for a GitHub repo, or `glab` for GitLab. If neither resolves, ask the user where the spec lives. Never guess an issue URL scheme.
 
 ## Process
 
