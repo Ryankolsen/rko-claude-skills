@@ -90,6 +90,7 @@ skills claiming one job make that pick a coin toss.
 | Skill | Description |
 |-------|-------------|
 | `write-a-skill` | Create new skills with proper structure and progressive disclosure |
+| `setup-project-skills` | Detect how a repo runs its checks and generate its `run-tests` and `verify` skills |
 | `teach` | Teach a new skill or concept within this workspace |
 | `handoff` | Compact the conversation into a handoff document for another agent |
 
