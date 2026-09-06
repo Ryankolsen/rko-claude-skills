@@ -26,6 +26,17 @@ The full pre-commit gate: typecheck, lint, tests, build — whatever this reposi
 
 A repository that has only tests may implement `verify` as running the tests. What it must not do is claim a check it does not perform.
 
+## Reserved names are always model-invocable
+
+A skill implementing a reserved name must set `disable-model-invocation: false`.
+
+The flag does not merely withhold a skill from auto-selection — it removes it
+from the Skill tool altogether, leaving it reachable only when the user types
+its name. A reserved name exists so that a generic skill or agent can invoke it,
+and a subagent has no user to ask, so `true` severs exactly the delegation the
+name was created for. `verify` is the tempting case, being the expensive gate;
+it is also the case that breaks `qa-verifier` outright.
+
 ## Fallback chain
 
 When a generic capability needs to run something and the reserved skill is absent, it works down this list. The order is the contract, and the last step is not optional.
