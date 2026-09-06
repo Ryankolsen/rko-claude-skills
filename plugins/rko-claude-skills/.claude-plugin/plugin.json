@@ -1,7 +1,7 @@
 {
   "name": "rko-claude-skills",
   "description": "A curated library of Claude Code skills for software development workflows — PRDs, implementation planning, debugging, architecture review, and more.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Ryan Kolsen",
     "email": "ryankolsen@gmail.com"

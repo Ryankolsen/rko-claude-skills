@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews a diff along the Standards axis — does the code follow this repository's documented coding standards, plus the Fowler smell baseline — and reports findings without fixing any of them. Use when someone wants changes reviewed for conventions, style, or code smells, asks whether a branch follows the repo's standards, or wants a second pair of eyes on a diff before committing.
+description: Reviews a diff along the Standards axis only — does the code follow this repository's documented coding standards, plus the Fowler smell baseline — and reports findings without fixing any of them. Use when someone wants changes reviewed for conventions, style, or code smells, or wants a second pair of eyes on a diff before committing. It does not check the change against its spec or issue, so when fidelity to what was asked for also matters, invoke the `code-review` skill for the full two-axis review instead.
 model: inherit
 color: purple
 tools: Read, Glob, Grep, Bash
