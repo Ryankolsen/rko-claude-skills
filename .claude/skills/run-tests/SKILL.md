@@ -1,6 +1,8 @@
 ---
 name: run-tests
 description: Run the validator test suite for this plugin repository. Use when the user wants to run tests, check if tests pass, verify a change to a skill or agent file, or asks whether the plugin is still valid.
+domain: test-execution
+disable-model-invocation: false
 ---
 
 # Run Tests

@@ -1,6 +1,8 @@
 ---
 name: verify
 description: Run the full pre-commit gate for this plugin repository. Use when the user wants to verify a change is ready to commit, asks whether everything passes, or is about to commit or open a PR.
+domain: verification
+disable-model-invocation: true
 ---
 
 # Verify
