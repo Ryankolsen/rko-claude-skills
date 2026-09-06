@@ -4,3 +4,9 @@ node_modules/
 
 # Local Claude Code settings; the skills beside it are part of the repo.
 .claude/settings.local.json
+
+# Local symlink to plugins/rko-claude-skills/agents, so this repo's own agents
+# load from the working tree instead of the published plugin cache. A dev
+# convenience, not repo content — tracking it would shadow the installed
+# plugin's agents with a second copy of the same names.
+.claude/agents
