@@ -31,6 +31,7 @@ documentation, then auto-detection, then asking — and never guesses a command.
 | `agent-architect` | Design a new agent: inventory existing skills, research prior art, return a build spec |
 | `skill-author` | Draft a SKILL.md from an approved spec, self-checked against the write-a-skill rubric |
 | `qa-verifier` | Run the project's verification gate and report a triaged verdict, without fixing anything |
+| `codebase-explorer` | Explore a codebase and return a structured map: entry points, modules, seams, and the next skill to reach for |
 
 Agent files are deliberately thin — identity, a tool allowlist, and what they
 delegate to. Procedure lives in skills, so the same procedure runs whether it is
