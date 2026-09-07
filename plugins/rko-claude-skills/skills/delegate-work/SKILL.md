@@ -72,6 +72,14 @@ three more attempts and a bigger diff to read.
 Spawn one agent at a time: they share a working tree, and two writers in one
 tree corrupt each other. Parallel slices need separate worktrees — not this loop.
 
+**Spawn every agent without a `model` override.** Each one's frontmatter already
+declares the model it is meant to run on, and that declaration is the decision.
+Passing `model` yourself silently replaces it — so an orchestrator running on a
+large model hands that model to every worker it spawns, which inverts the split
+this skill exists to create. You hold the plan on the expensive model; the
+workers read, edit, and run the gate on the cheap one. Their frontmatter says
+which, and it is not yours to override.
+
 ## Commenting on the issue
 
 Comment after **every failed attempt**, so the issue carries the history rather
