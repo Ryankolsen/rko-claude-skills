@@ -25,6 +25,23 @@ own context, use the `do-work` skill instead.
 - **A clean tree**, or the user's word that existing changes are the baseline.
   You cannot attribute a failure you inherited.
 
+**Check once for a test-running commit hook.** Before the first attempt, look
+for one: an executable `.git/hooks/pre-commit`, a `.husky/pre-commit`, or
+`git config core.hooksPath` pointed at a directory with a `pre-commit` file in
+it. Read it far enough to tell whether it runs the test suite (a Husky/lefthook
+wrapper calling `test`, `run-tests`, or the same command `verify` uses counts).
+Remember the answer for the rest of this run — one check, not one per attempt.
+It changes what *On green* does at commit time; see below.
+
+**Expect the hook to exist.** A repository this skill runs against should
+already gate commits on its own tests — it is what stops a commit landing
+without ever having been checked, independent of whether anything upstream
+remembered to verify. Its absence is a gap, not a neutral finding: **before the
+first attempt**, tell the user no test-running pre-commit hook was found and
+offer to add one via the `setup-project-skills` skill. Proceed with the loop
+either way once you've asked — this is an offer, not a blocker — but don't
+silently skip past it, and don't build the hook yourself outside that skill.
+
 **Locating the issue tracker.** If `docs/agents/issue-tracker.md` exists, follow
 it. Otherwise check the git remote and whether `gh` is authenticated for GitHub,
 or `glab` for GitLab. If neither resolves, ask where the issue lives and whether
@@ -120,7 +137,13 @@ it cannot know the attempt number.
    to the user and do **not** re-enter the loop — a style finding must never
    consume a correctness attempt.
 2. **Commit**, referencing the issue so the tracker closes it. Invoke the
-   `commit-message` skill for the grouping and the message.
+   `commit-message` skill for the grouping and the message. **If step 1 found a
+   test-running commit hook, commit with `--no-verify`.** `qa-verifier` just ran
+   the equivalent gate on this exact tree and returned green; nothing has
+   changed since, so the hook would only re-run the same suite a second time on
+   the same code. This is not bypassing a check — it is not repeating one that
+   already ran. If `code-reviewer` or anything else touched the tree between
+   the verdict and this commit, re-verify instead of trusting the earlier green.
 3. **Stop.** Do not push, do not open a PR, do not close the issue by hand.
    Report what was committed and what `code-reviewer` said.
 

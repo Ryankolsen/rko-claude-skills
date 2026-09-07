@@ -1,6 +1,6 @@
 ---
 name: setup-project-skills
-description: Set up a repository with the reserved skill names that generic skills and agents depend on, by detecting how the project runs its tests and checks. Use when adopting this plugin in a new repository, when a skill reports it cannot find run-tests or verify, or when the user asks to bootstrap or configure project skills.
+description: Set up a repository with the reserved skill names that generic skills and agents depend on, by detecting how the project runs its tests and checks, and offer a pre-commit hook wired to the same gate if none exists. Use when adopting this plugin in a new repository, when a skill reports it cannot find run-tests or verify, when `delegate-work` reports no test-running commit hook was found, or when the user asks to bootstrap or configure project skills.
 domain: project-bootstrap
 disable-model-invocation: true
 ---
@@ -74,6 +74,30 @@ If either is wrong for a generated skill, the detection was wrong — fix the
 command in the file. If it is wrong for a skipped one, say so plainly and ask
 before editing: it is someone's hand-written file, and being stale is a
 different problem from being wrong.
+
+## 5. Offer a pre-commit hook, if none guards commits yet
+
+A repository with no test-running commit hook lets a broken commit land
+whether or not anything upstream remembered to run `verify` first — that gap is
+what sends callers here. Check for one: an executable `.git/hooks/pre-commit`,
+a `.husky/pre-commit`, or `git config core.hooksPath` pointed at a directory
+holding a `pre-commit` file. Read it far enough to tell whether it actually runs
+tests, rather than existing for something unrelated (formatting, commit-message
+linting).
+
+If a hook already runs tests, say so and stop here — do not add a second one.
+
+If none does, ask the user before writing anything: offer to add
+`.git/hooks/pre-commit` that runs this repository's `verify` command (from step
+3/4, generated or confirmed) and aborts the commit on a non-zero exit. Keep it
+to that one job — no formatting, no linting beyond what `verify` already does —
+and make it executable (`chmod +x`). If the repository already uses Husky or
+lefthook (a `.husky/` directory, a `lefthook.yml`), add the hook through that
+tool's own convention instead of writing a competing plain hook.
+
+Never install a hook the user did not approve, and never overwrite one that
+already exists — if it runs something other than tests, that's someone's
+deliberate choice to leave alone; mention it and move on.
 
 ## When the binary is missing
 
