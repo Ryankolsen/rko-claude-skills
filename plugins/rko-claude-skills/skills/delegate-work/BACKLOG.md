@@ -1,6 +1,6 @@
 # Choosing the next issue
 
-How the queue is read when `delegate-work` is given a count rather than a single
+How the queue is read when `delegate-work` is given `next N` rather than a single
 issue. The per-issue loop itself is in [SKILL.md](SKILL.md).
 
 ## Read the queue

@@ -1,6 +1,7 @@
 ---
 name: delegate-work
 description: Orchestrate the agents against one issue or a queue of them — developer builds, qa-verifier judges, failures go back for a capped number of attempts, then commit and move on. Use when the user wants an issue or plan phase implemented by subagents rather than in the main thread, wants a backlog worked through unattended, or asks to run the agents on a queue. Keeps the main thread holding the plan instead of the implementation.
+argument-hint: "An issue (123 or #123), or `next N` to work N ready issues"
 domain: work-orchestration
 disable-model-invocation: true
 ---
@@ -102,9 +103,14 @@ unfinished.
 
 ## Working a queue instead of one issue
 
-Given a count rather than an issue (`delegate-work 5`), work up to that many
-issues in sequence, running the loop above on each. The count is a budget, not a
-target; with neither an issue nor a count, ask which. See
+**A bare number is always an issue.** `delegate-work 5` works issue #5. A queue
+run must say so: `delegate-work next 5` works up to five ready issues. The
+ambiguity is deliberate to resolve this way — mistaking an issue number for a
+budget starts a five-issue unattended run nobody asked for, while the reverse
+mistake is one issue and a shrug.
+
+Given `next N`, work up to N issues in sequence, running the loop above on each.
+N is a budget, not a target. Given neither an issue nor `next N`, ask which. See
 [BACKLOG.md](BACKLOG.md) for choosing the next issue and when to stop.
 
 A bail ends the whole run, for the reason in *Bailing*: the issue that would not
