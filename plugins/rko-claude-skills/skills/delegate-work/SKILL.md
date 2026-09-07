@@ -146,7 +146,8 @@ it cannot know the attempt number.
    in depth that `qa-verifier` deliberately does not attempt. Its findings go
    to the user and do **not** re-enter the loop — a style finding must never
    consume a correctness attempt.
-2. **Commit**, referencing the issue so the tracker closes it. Invoke the
+2. **Commit**, with `Closes #<issue>` (or the tracker's equivalent keyword) in
+   the message body so the tracker closes it once the commit lands. Invoke the
    `commit-message` skill for the grouping and the message. **If step 1 found a
    test-running commit hook, commit with `--no-verify`.** `qa-verifier` just ran
    the equivalent gate on this exact tree and returned green; nothing has
@@ -154,8 +155,19 @@ it cannot know the attempt number.
    the same code. This is not bypassing a check — it is not repeating one that
    already ran. If `code-reviewer` or anything else touched the tree between
    the verdict and this commit, re-verify instead of trusting the earlier green.
-3. **Stop.** Do not push, do not open a PR, do not close the issue by hand.
-   Report what was committed and what `code-reviewer` said.
+3. **Push to the branch's upstream.** This is the step that actually closes the
+   issue — the closing keyword in step 2 does nothing until the commit reaches
+   the remote the tracker watches. Push only the branch you committed to, never
+   `--force`, and never push if the branch has no upstream configured or you
+   are unsure which remote the tracker is watching — stop and ask instead of
+   guessing at shared state. If the push is rejected (the remote moved), stop
+   and report it rather than force-pushing or rebasing to make it fit.
+4. **Stop.** Do not open a PR, do not close the issue by hand — the push and
+   the closing keyword already did it. Confirm the issue actually closed (a
+   quick tracker check, not a guess from the keyword alone) and report what
+   was committed, pushed, and what `code-reviewer` said. If the tracker did not
+   close it — keyword not recognized, issue in another repo, closing disabled
+   — say so plainly rather than reporting it closed.
 
 ## Bailing
 
