@@ -63,8 +63,7 @@ skills claiming one job make that pick a coin toss.
 | Skill | Description |
 |-------|-------------|
 | `do-work` | Execute a unit of work end-to-end: plan, implement, validate, commit |
-| `delegate-work` | Drive an issue to green by delegating to the developer and qa-verifier agents, with an attempt cap |
-| `work-the-backlog` | Work a queue of ready issues unattended, one delegate-work loop each, stopping on the first bail |
+| `delegate-work` | Run the agents against one issue or a queue: developer builds, qa-verifier judges, capped attempts, then commit |
 | `tdd` | Test-driven development: what a good test is, seams, and the red-green loop |
 | `prototype` | Build a throwaway prototype to answer a design question |
 

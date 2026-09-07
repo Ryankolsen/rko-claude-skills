@@ -1,8 +1,8 @@
 ---
 name: delegate-work
-description: Drive an issue to green by delegating to subagents — the developer agent builds, qa-verifier judges, and failures go back for a fixed number of attempts before bailing to the user. Use when the user asks for one issue or plan phase to be implemented by subagents rather than in the main thread, or when the work-the-backlog skill hands over a single issue. Keeps the main thread holding the plan instead of the implementation.
+description: Orchestrate the agents against one issue or a queue of them — developer builds, qa-verifier judges, failures go back for a capped number of attempts, then commit and move on. Use when the user wants an issue or plan phase implemented by subagents rather than in the main thread, wants a backlog worked through unattended, or asks to run the agents on a queue. Keeps the main thread holding the plan instead of the implementation.
 domain: work-orchestration
-disable-model-invocation: false
+disable-model-invocation: true
 ---
 
 # Delegate work
@@ -87,17 +87,30 @@ it cannot know the attempt number.
 
 ## Bailing
 
-At 5 failed attempts, stop and hand back to the user:
+At 5 failed attempts, stop and hand back to the user. **Leave the tree dirty** —
+the work is worth inspecting, and discarding it is the user's call. Comment on
+the issue saying it was returned, and report the attempts made, the final
+triage, the files changed, and your read on why it did not converge: a flapping
+test, a misunderstood requirement, a fix that keeps breaking something else.
 
-- **Leave the tree dirty.** The work is worth inspecting; discarding it is the
-  user's call, not yours.
-- **Report**: attempts made, the final triage, files changed across the whole
-  run, and your read on why it did not converge — a flapping test, a
-  misunderstood requirement, a fix that keeps breaking something else.
-- **Comment on the issue** saying it was returned to the user after 5 attempts.
+Working a queue, a bail stops every remaining issue too: phases are
+dependency-ordered, and continuing yields several dirty trees instead of one
+problem still small enough to understand.
 
 A bail is a normal outcome, not a failure to hide. Say plainly that the work is
 unfinished.
+
+## Working a queue instead of one issue
+
+Given a count rather than an issue (`delegate-work 5`), work up to that many
+issues in sequence, running the loop above on each. The count is a budget, not a
+target; with neither an issue nor a count, ask which. See
+[BACKLOG.md](BACKLOG.md) for choosing the next issue and when to stop.
+
+A bail ends the whole run, for the reason in *Bailing*: the issue that would not
+converge is often what the next one builds on. Keep only each issue's outcome —
+the triage is already on the issue, and carrying five loops of it makes this as
+expensive as doing the work yourself.
 
 ## What you must not do
 
