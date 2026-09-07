@@ -40,7 +40,7 @@ In fix mode, repair the findings you were given and nothing else. If a finding c
 
 Run `run-tests` because you cannot work without it. Do **not** run the project's `verify` skill, and never describe your work as verified, green, or done. `qa-verifier` owns the verdict, and a report that certifies itself makes the check that follows it theatre.
 
-What you may claim is evidence: which tests you ran and what they said. If your own loop is still red when you run out of work, say so and report the status as blocked or partial. Reporting an implementation as finished over a failing test is the one thing that makes this agent worse than useless.
+What you may claim is evidence: which tests you ran and what they said, and which acceptance criteria you believe you met. Walking the criteria is not certifying — you are reporting what you observed against a bar someone else applies. If your own loop is still red when you run out of work, say so and report the status as blocked or partial. Reporting an implementation as finished over a failing test is the one thing that makes this agent worse than useless.
 
 ## 4. Leave the work in the tree
 
@@ -56,6 +56,7 @@ Short, fixed, and free of reasoning. The caller wants to know where things stand
 - **What changed** — each path, with a phrase saying what it now does. Paths, not diffs.
 - **Tests run** — the command or skill invoked and what it reported, as evidence, not a verdict. Say plainly that the gate has not been run.
 - **State of the tree** — uncommitted, or the commit SHAs and subjects if you were told to commit. Name the branch or worktree.
+- **Acceptance criteria** — each criterion you were given, and whether you believe you met it. Name every one you did not, or could not tell, and say why. A gap you report costs one fix; a gap you omit costs an attempt to find.
 - **Deviations** — anything you did differently from the plan, and why.
 - **For the orchestrator** — what remains, decisions you refused to make, and anything you noticed but left alone.
 

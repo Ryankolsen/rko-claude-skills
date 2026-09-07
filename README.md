@@ -86,6 +86,7 @@ skills claiming one job make that pick a coin toss.
 | Skill | Description |
 |-------|-------------|
 | `code-review` | Review a diff on two axes: repo standards, and fidelity to the spec |
+| `commit-safety` | The checklist for whether a diff is safe to land: criteria, secrets, side effects |
 | `commit-message` | Group pending changes into logical commits and write each message |
 | `resolving-merge-conflicts` | Resolve an in-progress merge or rebase conflict |
 | `git-guardrails-claude-code` | Hooks that block dangerous git commands before they execute |

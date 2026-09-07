@@ -42,8 +42,11 @@ see the count — a subagent cannot.
    and the original issue so it repairs toward the design already chosen.
 2. **Spawn `qa-verifier`** on the tree the developer left dirty. It runs the
    gate *and* peer-reviews the diff, and it owns the verdict. Never accept the
-   developer's own account of whether the work is correct. Tell it what the
-   issue asked for, so it can judge what the diff does beyond that.
+   developer's own account of whether the work is correct. **Pass it the issue's
+   acceptance criteria verbatim**, not a summary: they are the bar it checks the
+   diff against in both directions — what the change fails to do, and what it
+   does beyond the brief. Summarised, they lose the specific values that make
+   them checkable, and an unmet criterion reads as met.
 3. **Blocked** → bail immediately, per *Bailing*, without incrementing. The
    repository cannot be verified — no gate, and none the fallback chain could
    resolve — so this is a decision for the user (invoke `setup-project-skills`,
