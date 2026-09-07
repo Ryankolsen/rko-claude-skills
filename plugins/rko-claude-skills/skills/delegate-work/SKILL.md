@@ -41,10 +41,15 @@ see the count — a subagent cannot.
    attempts give it fix mode: the previous triage, which findings are its own,
    and the original issue so it repairs toward the design already chosen.
 2. **Spawn `qa-verifier`** on the tree the developer left dirty. It runs the
-   gate and owns the verdict. Never accept the developer's own account of
-   whether the work is correct.
+   gate *and* peer-reviews the diff, and it owns the verdict. Never accept the
+   developer's own account of whether the work is correct. Tell it what the
+   issue asked for, so it can judge what the diff does beyond that.
 3. **Green** → go to *On green*. **Red** → comment on the issue, increment, and
-   return to step 1 with the triage.
+   return to step 1 with the triage. A red verdict has two possible sources —
+   the gate failed, or the review found a leaked secret or an unintended side
+   effect — and both are real failures that go back to the developer. Its
+   advisory findings do not: like `code-reviewer`'s, they go to the user and
+   never consume an attempt.
 4. **At 5 red attempts** → bail, per *Bailing* below.
 
 **Bail before 5 when another attempt cannot help.** The cap is a ceiling, not a
@@ -77,14 +82,27 @@ verify failed: 3 tests in auth.test.ts
 Re-spawning developer in fix mode.
 ```
 
+**Withhold any finding `qa-verifier` tagged `not for the tracker`.** It tags
+leaked credentials that way because this comment is public by default, and a
+comment naming the file and line of a live key broadcasts the exposure the
+finding exists to contain. Post that one as its own line — `1 finding withheld
+as unpublishable — see the run` — naming neither the file, the line, nor the
+kind of credential. It still goes to `developer` in full, and the tag is a
+publishing rule, not a routing one.
+
+Read the tag; never infer it. A finding you decide looks sensitive is still
+posted, and a tagged one is withheld even when it looks harmless to you — the
+agent that read the diff is the one that knows.
+
 `qa-verifier` does not post this; you do. It is read-only by construction, and
 it cannot know the attempt number.
 
 ## On green
 
-1. **Spawn `code-reviewer` once** on the final diff. Its findings go to the
-   user and do **not** re-enter the loop — a style finding must never consume a
-   correctness attempt.
+1. **Spawn `code-reviewer` once** on the final diff, for the standards review
+   in depth that `qa-verifier` deliberately does not attempt. Its findings go
+   to the user and do **not** re-enter the loop — a style finding must never
+   consume a correctness attempt.
 2. **Commit**, referencing the issue so the tracker closes it. Invoke the
    `commit-message` skill for the grouping and the message.
 3. **Stop.** Do not push, do not open a PR, do not close the issue by hand.
