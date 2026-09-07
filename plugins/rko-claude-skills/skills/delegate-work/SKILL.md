@@ -44,7 +44,12 @@ see the count — a subagent cannot.
    gate *and* peer-reviews the diff, and it owns the verdict. Never accept the
    developer's own account of whether the work is correct. Tell it what the
    issue asked for, so it can judge what the diff does beyond that.
-3. **Green** → go to *On green*. **Red** → comment on the issue, increment, and
+3. **Blocked** → bail immediately, per *Bailing*, without incrementing. The
+   repository cannot be verified — no gate, and none the fallback chain could
+   resolve — so this is a decision for the user (invoke `setup-project-skills`,
+   or say to proceed without a gate), not a defect for the developer. Forward
+   any §2 findings it still returned; the diff review runs without a gate.
+   **Green** → go to *On green*. **Red** → comment on the issue, increment, and
    return to step 1 with the triage. A red verdict has two possible sources —
    the gate failed, or the review found a leaked secret or an unintended side
    effect — and both are real failures that go back to the developer. Its
@@ -110,7 +115,8 @@ it cannot know the attempt number.
 
 ## Bailing
 
-At 5 failed attempts, stop and hand back to the user. **Leave the tree dirty** —
+At 5 failed attempts — or on the first `blocked` verdict from either agent —
+stop and hand back to the user. **Leave the tree dirty** —
 the work is worth inspecting, and discarding it is the user's call. Comment on
 the issue saying it was returned, and report the attempts made, the final
 triage, the files changed, and your read on why it did not converge: a flapping

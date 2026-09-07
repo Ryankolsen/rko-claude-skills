@@ -32,7 +32,7 @@ Stay inside the unit of work. Something outside it that needs doing is a line in
 
 For backend code, work in strict red-green slices, one test at a time — invoke the `tdd` skill for the rules of that loop and what makes a test worth keeping. Between red and green, invoke the project's `run-tests` skill; it is tests-only and safe to call every cycle. For frontend code, implement directly.
 
-If the repository supplies no `run-tests` skill, work down the fallback chain in [CONVENTIONS.md](../CONVENTIONS.md) — documentation, then unambiguous auto-detection. **Never guess a command.** With no user to ask, the chain ends at reporting that you could not determine how to run the tests.
+If the repository supplies no `run-tests` skill, work down the fallback chain in [CONVENTIONS.md](../CONVENTIONS.md) — documentation, then unambiguous auto-detection. **Never guess a command.** With no user to ask, the chain ends at reporting that you could not determine how to run the tests, and naming the `setup-project-skills` skill as the remedy — it writes the missing reserved skill once a user approves the command it proposes. Report the status as blocked; do not implement untested against a gate you could not find.
 
 In fix mode, repair the findings you were given and nothing else. If a finding can only be resolved by changing a decision the plan already made, stop and put that in your report as a decision for the orchestrator. Re-deciding the design while fixing a test is how a plan quietly stops being the plan.
 
