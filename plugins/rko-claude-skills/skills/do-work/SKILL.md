@@ -38,3 +38,11 @@ If the repository has no `verify` skill, work down the fallback chain in [CONVEN
 ### 5. Commit
 
 Once `verify` passes, commit the work.
+
+## Delegating a unit of work to a subagent
+
+An orchestrator that wants to keep its own context for the plan can hand a single unit of work to the `developer` agent instead of running this workflow in the main thread. That agent does steps 1–3 in its own context and reports back; three things are deliberately different there, and nowhere else:
+
+- It has no user to ask, so an underspecified unit of work is refused (step 1) rather than clarified.
+- It does not run step 4 or claim a verdict. The orchestrator spawns `qa-verifier` for that, so the code that was written is not the thing that certifies it.
+- It leaves the work uncommitted, so `qa-verifier` can see exactly what changed and step 5 stays the orchestrator's decision.
