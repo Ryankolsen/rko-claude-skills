@@ -19,7 +19,12 @@ A deep module (as opposed to a shallow module) is one which encapsulates a lot o
 
 Check with the user that these modules match their expectations. Check with the user which modules they want tests written for, and at what boundary.
 
-5. Once you have a complete understanding of the problem and solution, use the template below to write the PRD. The PRD should be submitted as a GitHub issue.
+5. Once you have a complete understanding of the problem and solution, use the template below to write the PRD. The PRD should be submitted as a GitHub issue titled `PRD: {Feature Name}` and labelled `prd`.
+
+**The `prd` label is what distinguishes a PRD from the plans and slices derived from it.** Downstream skills read it: `prd-to-plan` labels its output `plan`, `prd-to-issues` labels each slice `afk` or `hitl`, and `delegate-work` uses those labels to decide what an unattended run may pick up. A PRD is a source document, never a unit of work — an unlabelled one looks like work and can be picked up by mistake.
+
+Check the label exists first with `gh label list`. If it does not, create it (`gh label create prd --description "Product requirements document — source, not a unit of work"`) and say that you did.
+
 
 <prd-template>
 

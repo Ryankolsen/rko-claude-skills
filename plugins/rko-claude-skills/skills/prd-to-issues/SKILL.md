@@ -29,7 +29,14 @@ Understanding the test setup is required — you will write concrete, runnable r
 
 Break the PRD into **tracer bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.
 
-Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an architectural decision or a design review. AFK slices can be implemented and merged without human interaction. Prefer AFK over HITL where possible.
+Every slice is either **AFK** or **HITL**, and it carries that as a GitHub label:
+
+- **`afk`** — implementable and mergeable with no human in the loop. This is the label `delegate-work` reads to decide what an unattended run may pick up, so applying it is a statement that a subagent may build and commit this slice while nobody is watching.
+- **`hitl`** — needs a human: an architectural decision, a design review, a credential, a manual verification. Never picked up by an unattended run.
+
+Prefer AFK over HITL where possible. When a slice is only HITL because of one decision, consider splitting the decision out as its own small `hitl` slice so the build work behind it can be `afk`.
+
+Neither label is optional. An unlabelled slice is ambiguous exactly where it matters most — an unattended agent cannot tell "safe to build alone" from "nobody has decided this yet" — so a slice with no type label must not be created.
 
 <vertical-slice-rules>
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
@@ -38,14 +45,14 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 - Every AFK slice MUST include tests written red-first before any implementation begins
 </vertical-slice-rules>
 
-Always create a final QA issue with a detailed manual QA plan for all items that require human verification. This QA issue should be the last item in the dependency graph, blocked by all other slices. It should be HITL.
+Always create a final QA issue with a detailed manual QA plan for all items that require human verification. This QA issue should be the last item in the dependency graph, blocked by all other slices. It is `hitl` by definition — it exists precisely because a human must look.
 
 ### 4. Quiz the user
 
 Present the proposed breakdown as a numbered list. For each slice, show:
 
 - **Title**: short descriptive name
-- **Type**: HITL / AFK
+- **Type**: AFK or HITL, and for a HITL slice, the one thing a human is needed for
 - **Blocked by**: which other slices (if any) must complete first
 - **User stories covered**: which user stories from the PRD this addresses
 
@@ -54,13 +61,20 @@ Ask the user one question at a time. Wait for their answer before asking the nex
 1. Does the granularity feel right? (too coarse / too fine)
 2. Are the dependency relationships correct?
 3. Should any slices be merged or split further?
-4. Are the correct slices marked as HITL and AFK?
+4. Are the correct slices marked AFK and HITL? A slice wrongly marked `afk` will be built unattended, so err toward `hitl` when unsure.
 
 Iterate until the user approves the breakdown.
 
 ### 5. Create the GitHub issues
 
-For each approved slice, create a GitHub issue using `gh issue create`. Use the issue body template below.
+For each approved slice, create a GitHub issue using `gh issue create --label afk` or `--label hitl` to match its type. Use the issue body template below, which repeats the type in the body so it survives a label being lost or renamed.
+
+Check both labels exist first with `gh label list`. Create whichever is missing and say that you did:
+
+```
+gh label create afk  --description "Safe to implement unattended by an agent"
+gh label create hitl --description "Needs a human — decision, review, or manual verification"
+```
 
 Create issues in dependency order (blockers first) so you can reference real issue numbers in the "Blocked by" field.
 
@@ -68,6 +82,12 @@ Create issues in dependency order (blockers first) so you can reference real iss
 ## Parent PRD
 
 #<prd-issue-number>
+
+## Type
+
+`AFK` — implementable unattended.
+
+Or, for a HITL slice: `HITL` — and one line naming exactly what the human is needed for (the decision to make, the thing to review, the credential to supply).
 
 ## What to build
 

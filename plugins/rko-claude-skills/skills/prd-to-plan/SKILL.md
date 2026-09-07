@@ -72,7 +72,11 @@ Iterate until the user approves the breakdown.
 
 ### 6. Submit the plan as a GitHub issue
 
-Submit the plan as a GitHub issue using `gh issue create`. Title the issue `Plan: {Feature Name}`. Link back to the source PRD issue in the body. Use the template below.
+Submit the plan as a GitHub issue using `gh issue create`. Title the issue `Plan: {Feature Name}`, label it `plan`, and link back to the source PRD issue in the body. Use the template below.
+
+**The `plan` label distinguishes the plan from the `prd` it came from and from the `afk`/`hitl` slices that may be cut from it.** Like a PRD, a plan is a source document rather than a unit of work — `delegate-work` must never pick one up as an issue to implement, and the label is what keeps it out of that queue.
+
+Check the label exists first with `gh label list`. If it does not, create it (`gh label create plan --description "Phased implementation plan — source, not a unit of work"`) and say that you did.
 
 <plan-template>
 # Plan: {Feature Name}
