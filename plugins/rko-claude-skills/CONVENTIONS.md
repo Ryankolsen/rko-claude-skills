@@ -67,6 +67,14 @@ Every skill declares two things beyond its name and description.
 - **`false` — auto-invocable.** Claude may reach for it based on the conversation. Reserve this for skills that answer a situation the user is already in: a bug was reported, a merge conflict is open, a commit is being written.
 - **`true` — workflow.** The skill runs only when invoked by name. Use it for anything deliberate, expensive, or outward-facing: publishing issues, spawning background agents, interviewing the user, rewriting architecture.
 
+A skill another skill must invoke is auto-invocable regardless. The flag does
+not merely govern auto-selection: `true` removes a skill from the Skill tool, so
+nothing but a human typing its name can reach it — not an agent, and not another
+skill. `delegate-work` is outward-facing enough to want `true` and is `false`
+anyway, because `work-the-backlog` has to be able to call it. Put the
+deliberateness at the entry point the user actually invokes, and let what it
+composes with stay reachable.
+
 **At most one auto-invocable skill per domain.** An agent chooses from descriptions alone, so two skills claiming the same job make the choice arbitrary. Workflow skills are exempt — being chosen by name, they cannot be mis-selected — which is why two skills may share a domain if both are workflow.
 
 When in doubt, choose workflow. A skill that fails to trigger is a minor annoyance; one that triggers unbidden and publishes something is not.

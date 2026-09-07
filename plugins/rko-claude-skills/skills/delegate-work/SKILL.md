@@ -1,8 +1,8 @@
 ---
 name: delegate-work
-description: Drive an issue to green by delegating to subagents — the developer agent builds, qa-verifier judges, and failures go back for a fixed number of attempts before bailing to the user. Use when the user wants an issue or a plan phase implemented by subagents rather than in the main thread, asks to orchestrate agents, or wants work built and QA'd in a loop. Keeps the main thread holding the plan instead of the implementation.
+description: Drive an issue to green by delegating to subagents — the developer agent builds, qa-verifier judges, and failures go back for a fixed number of attempts before bailing to the user. Use when the user asks for one issue or plan phase to be implemented by subagents rather than in the main thread, or when the work-the-backlog skill hands over a single issue. Keeps the main thread holding the plan instead of the implementation.
 domain: work-orchestration
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Delegate work
