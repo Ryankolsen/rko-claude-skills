@@ -21,9 +21,12 @@ If the PRD is not already in your context window, fetch it with `gh issue view <
 
 Explore the codebase to understand:
 - The current state of the code relevant to this PRD
+- **Where the source lives**: which files and directories each slice will touch, and the existing file whose pattern a new one should follow
 - The **test setup**: framework (Jest/Vitest), existing test patterns, available factories and mock utilities, and where test files live
 
 Understanding the test setup is required — you will write concrete, runnable red tests for each slice, not generic placeholders.
+
+Capture the source locations too. An issue is read by a fresh agent with no memory of this exploration, so a path you resolve once here is a path that no one has to rediscover on every build attempt.
 
 ### 3. Draft vertical slices
 
@@ -42,8 +45,11 @@ Neither label is optional. An unlabelled slice is ambiguous exactly where it mat
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
 - Prefer many thin slices over few thick ones
+- A slice that creates or extends more than about three source files, or introduces more than one new concept, is too thick — split it
 - Every AFK slice MUST include tests written red-first before any implementation begins
 </vertical-slice-rules>
+
+The size ceiling is not style. A thick slice is built by an agent in one long session whose context grows with every turn and is re-sent on the next, so cost climbs faster than the work does — and when the slice fails, the whole of it is retried. Two thin slices that pass on the first attempt are cheaper than one thick slice that passes on the third.
 
 Always create a final QA issue with a detailed manual QA plan for all items that require human verification. This QA issue should be the last item in the dependency graph, blocked by all other slices. It is `hitl` by definition — it exists precisely because a human must look.
 
@@ -53,12 +59,13 @@ Present the proposed breakdown as a numbered list. For each slice, show:
 
 - **Title**: short descriptive name
 - **Type**: AFK or HITL, and for a HITL slice, the one thing a human is needed for
+- **Files**: the source files the slice creates or extends — the user's clearest signal that a slice is too thick
 - **Blocked by**: which other slices (if any) must complete first
 - **User stories covered**: which user stories from the PRD this addresses
 
 Ask the user one question at a time. Wait for their answer before asking the next question. Suggested questions (in order):
 
-1. Does the granularity feel right? (too coarse / too fine)
+1. Does the granularity feel right? (too coarse / too fine) — a slice touching more than about three source files is usually too thick
 2. Are the dependency relationships correct?
 3. Should any slices be merged or split further?
 4. Are the correct slices marked AFK and HITL? A slice wrongly marked `afk` will be built unattended, so err toward `hitl` when unsure.
@@ -91,14 +98,34 @@ Or, for a HITL slice: `HITL` — and one line naming exactly what the human is n
 
 ## What to build
 
-A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation. Reference specific sections of the parent PRD rather than duplicating content.
+A concise description of this vertical slice, stated as end-to-end behavior.
+
+**Restate every detail this slice must honour rather than citing the PRD for it.** Cite the parent for background; inline anything that constrains the work — a timing, a threshold, a sequence, a piece of copy, a deliberate difference from how the rest of the system behaves. A pointer costs a fresh reader the fetch of an entire PRD, repeated on every build attempt and every verification, and a constraint left behind in the parent is a constraint that gets built wrong.
+
+## Files in play
+
+Where this slice lands, so whoever builds it does not have to rediscover the codebase:
+
+- The source files to create or extend, by path.
+- The existing file whose pattern a new one should follow, where there is one.
+- Anything that must be read to do the work — a base class, an autoload, a config.
+
+Name what the exploration in step 2 established, and say plainly which parts you are unsure of. A path that turns out to be wrong is corrected in one step; a path that is missing is searched for across many.
 
 ## Acceptance criteria
+
+Each criterion is one statement that can be checked against the finished diff without re-reading the PRD: a specific observable behaviour, not a restatement of the slice. Every detail the PRD was precise about gets its own line, carrying the actual number, string, or ordering. A criterion nobody can check is the one a build drops without anyone noticing.
 
 - [ ] Criterion 1
 - [ ] Criterion 2
 - [ ] Criterion 3
 - [ ] All tests pass (the project's `verify` skill)
+
+## Out of scope
+
+What this slice deliberately does not do — including the things a reasonable reader would assume it covers. Name the neighbouring work that belongs to another slice, and any file or subsystem this slice should leave alone.
+
+This is not padding. `delegate-work` passes it to the agent that builds the slice, and `qa-verifier` judges blast radius against it; with no stated bound, an unattended build cannot tell a drive-by refactor from the job. Write "Nothing beyond the above" only when that is true.
 
 ## Blocked by
 
