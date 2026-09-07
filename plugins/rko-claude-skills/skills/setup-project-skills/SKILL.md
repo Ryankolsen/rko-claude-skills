@@ -45,8 +45,44 @@ Existing skills are skipped, never overwritten — a hand-tuned `run-tests` is
 almost certainly better than a generated one. The report names what was written
 and what was skipped.
 
-Read back what was written and confirm the command actually runs. A generated
-skill that names a command nobody has run is a guess with extra steps.
+**A skip is not a pass.** "Almost certainly better" is not "known to work": the
+skipped file may name a runner that has since moved, or a directory that no
+longer holds tests. The probe never ran it, so it carries a `mustVerify` note.
+Read the skipped file and put its command through step 4 alongside the ones you
+generated.
+
+## 4. Prove the command reports a real result
+
+"It ran and exited 0" is the wrong bar. A runner pointed at a directory holding
+no tests it recognises does exactly that: it runs, finds nothing, and exits
+clean. Green then means *nothing was checked*, and every agent downstream
+believes it.
+
+This applies to every reserved skill the repository will end up with — the ones
+just written and the ones that were skipped.
+
+Run each command and confirm two things:
+
+- **It executed a non-zero number of tests**, and the count is plausible for the
+  size of the suite. A summary saying `0 tests` — or no summary at all — is a
+  failure to verify, never a pass.
+- **A failure would come back red.** If the runner's exit status does not
+  reflect failing tests, the skill has to say how to read the result, because
+  the caller checks the exit status.
+
+If either is wrong for a generated skill, the detection was wrong — fix the
+command in the file. If it is wrong for a skipped one, say so plainly and ask
+before editing: it is someone's hand-written file, and being stale is a
+different problem from being wrong.
+
+## When the binary is missing
+
+Status `incomplete` means the stack was identified but the command cannot run as
+written — most often an engine binary that is not on `PATH`. The probe writes
+nothing.
+
+Ask the user for the missing piece, then write the skill with it substituted in.
+The detection is sound; only the path is unknown.
 
 ## When detection fails
 
@@ -61,5 +97,15 @@ admitting the runner could not be determined.
 ## Adding a stack
 
 A detector is a function returning `{ stack, evidence, runTests, verify }`, or
-`null` when it does not apply. Add one to the list in the script and a fixture to
-the test suite — the fixtures are what keep "works on any stack" honest.
+`null` when it does not apply. It may also return `missing` — a sentence naming
+what the user has to supply — which reports `incomplete` and suppresses writing.
+
+Add one to the list in the script and a fixture to the test suite — the fixtures
+are what keep "works on any stack" honest.
+
+**Detect and propose at the same depth.** The Godot detector once recursed to
+find `.gd` files and then proposed the directory it started from; GUT does not
+recurse by default, so the command it generated ran zero tests and exited 0. If
+finding the evidence needed a recursive walk, the command has to name what the
+walk found, not where it began. Prefer a config file the project already states
+over any directory the detector inferred.

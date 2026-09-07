@@ -23,8 +23,15 @@ function fixture(files) {
   return dir;
 }
 
+// The Godot detector looks at the machine for an engine binary, so the tests
+// state which machine they are pretending to be on rather than inheriting one.
 const probe = (dir, ...args) =>
-  JSON.parse(execFileSync("node", [PROBE, dir, ...args], { encoding: "utf8" }));
+  JSON.parse(
+    execFileSync(process.execPath, [PROBE, dir, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: "", GODOT: process.execPath },
+    }),
+  );
 
 const PNPM = {
   "package.json": JSON.stringify({
@@ -63,8 +70,42 @@ test("a Godot project resolves without a package manager", () => {
 
   assert.equal(plan.status, "detected");
   assert.equal(plan.stack, "godot");
-  assert.match(plan.skills["run-tests"].command, /godot/);
+  assert.match(plan.skills["run-tests"].command, /gut_cmdln\.gd/);
   assert.doesNotMatch(JSON.stringify(plan), /npm|pnpm|yarn/);
+});
+
+test("the Godot command names the directory the tests are actually in", () => {
+  // GUT does not recurse by default. A detector that recurses to find the tests
+  // and then points the runner one level too shallow generates a command that
+  // runs nothing and exits clean — the worst possible outcome.
+  const plan = probe(fixture(GODOT));
+
+  assert.match(plan.skills["run-tests"].command, /-gdir=res:\/\/test\/unit\b/);
+  assert.doesNotMatch(plan.skills["run-tests"].command, /-gdir=res:\/\/test\s/);
+});
+
+test("a stated GUT config wins over inferred directories", () => {
+  // GUT only auto-loads `.gutconfig.json`, so a project spelling it any other
+  // way needs it passed explicitly — but it is still the project's own answer.
+  const plan = probe(fixture({ ...GODOT, "gut_config.json": '{"dirs":["res://test/unit"]}' }));
+
+  assert.match(plan.skills["run-tests"].command, /-gconfig=res:\/\/gut_config\.json/);
+  assert.doesNotMatch(plan.skills["run-tests"].command, /-gdir/);
+  assert.match(plan.evidence, /gut_config\.json/);
+});
+
+test("a Godot project with no engine binary asks rather than emitting `godot`", () => {
+  const dir = fixture(GODOT);
+  const plan = JSON.parse(
+    execFileSync(process.execPath, [PROBE, dir, "--write"], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: "", GODOT: "" },
+    }),
+  );
+
+  assert.equal(plan.status, "incomplete", "a command that cannot run is not a detection");
+  assert.ok(plan.missing?.length > 0, "must say what it needs from the user");
+  assert.deepEqual(plan.written, [], "must not write a command that would fail with command-not-found");
 });
 
 test("an undetectable project asks rather than guesses", () => {
@@ -83,6 +124,10 @@ test("an existing reserved skill is never overwritten", () => {
   const plan = probe(dir, "--write");
 
   assert.deepEqual(plan.skipped, ["run-tests"]);
+  assert.ok(
+    plan.skills["run-tests"].mustVerify?.length > 0,
+    "a skip is not a pass: the skipped skill has never been run, so say it must be checked",
+  );
   assert.equal(readFileSync(join(dir, ".claude/skills/run-tests/SKILL.md"), "utf8"), original);
   assert.ok(existsSync(join(dir, ".claude/skills/verify/SKILL.md")), "the missing one is still written");
 });

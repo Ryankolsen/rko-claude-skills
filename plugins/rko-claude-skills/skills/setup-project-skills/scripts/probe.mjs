@@ -10,7 +10,8 @@
 // is reported as undetermined — never guessed.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 
 const read = (dir, file) => {
   try {
@@ -20,11 +21,27 @@ const read = (dir, file) => {
   }
 };
 
-const hasFileMatching = (dir, sub, re) => {
+/**
+ * The directories under `sub` that actually hold a matching file.
+ *
+ * Recursing to *decide* a stack and then proposing the directory you started
+ * from is how a detector ends up generating a command that runs nothing: the
+ * files are two levels down, the runner only looks one level in, and it exits
+ * cleanly having done no work. So return where the files really are, and let
+ * the caller name those directories.
+ */
+const dirsContaining = (dir, sub, re) => {
   try {
-    return readdirSync(join(dir, sub), { recursive: true }).some((f) => re.test(String(f)));
+    return [
+      ...new Set(
+        readdirSync(join(dir, sub), { recursive: true })
+          .map(String)
+          .filter((f) => re.test(f))
+          .map((f) => join(sub, dirname(f))),
+      ),
+    ].sort();
   } catch {
-    return false;
+    return [];
   }
 };
 
@@ -55,20 +72,56 @@ function detectNode(dir) {
   };
 }
 
+/**
+ * `godot` is usually not on PATH on macOS, where the engine ships as an .app
+ * bundle. Emitting the bare name there produces "command not found", which is a
+ * guess dressed as a detection.
+ */
+function findGodotBinary() {
+  const candidates = [
+    process.env.GODOT,
+    ...(process.env.PATH ?? "")
+      .split(":")
+      .filter(Boolean)
+      .flatMap((p) => ["godot", "godot4"].map((b) => join(p, b))),
+    "/Applications/Godot.app/Contents/MacOS/Godot",
+    join(homedir(), "Applications/Godot.app/Contents/MacOS/Godot"),
+  ];
+  return candidates.find((p) => p && existsSync(p)) ?? null;
+}
+
 function detectGodot(dir) {
   if (!read(dir, "project.godot")) return null;
 
-  const gut = ["test", "tests"].find((d) => hasFileMatching(dir, d, /\.gd$/));
-  if (!gut) return null;
+  // GUT auto-loads only the dotfile spelling. A project that spells it
+  // `gut_config.json` still has a stated config; it just has to be passed
+  // explicitly, and passing it beats inferring directories the project has
+  // already named.
+  const config = [".gutconfig.json", "gut_config.json"].find((f) => read(dir, f));
+  const dirs = ["test", "tests"].flatMap((d) => dirsContaining(dir, d, /test_.*\.gd$/));
 
-  // GUT is driven through the engine binary; there is no package manager.
-  const command = `godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://${gut} -gexit`;
+  if (!config && dirs.length === 0) return null;
+
+  const scope = config ? `-gconfig=res://${config}` : `-gdir=${dirs.map((d) => `res://${d}`).join(",")}`;
+  const evidence = config
+    ? `project.godot and ${config}`
+    : `project.godot and test_*.gd files under ${dirs.join(", ")}/`;
+
+  const binary = findGodotBinary();
+  const command = `${binary ?? "godot"} --headless --path . -s addons/gut/gut_cmdln.gd ${scope} -gexit`;
+
   return {
     stack: "godot",
-    evidence: `project.godot and .gd files under ${gut}/`,
+    evidence: binary
+      ? `${evidence}; engine binary at ${binary}`
+      : evidence,
     runTests: command,
     verify: command,
+    // GUT is driven through the engine binary; there is no package manager.
     note: "Godot has no typecheck or lint step, so verify runs the tests. Add more here if that changes.",
+    missing: binary
+      ? null
+      : "The Godot engine binary could not be found on PATH, in $GODOT, or in the usual macOS .app locations. Ask the user for its full path and substitute it for `godot` in the command below before writing.",
   };
 }
 
@@ -152,14 +205,35 @@ if (!detected) {
 }
 
 const commands = { "run-tests": detected.runTests, verify: detected.verify };
-const plan = { status: "detected", stack: detected.stack, evidence: detected.evidence, skills: {}, written: [], skipped: [] };
+
+// A stack can be identified and still be unrunnable — a detected engine whose
+// binary is nowhere to be found. Writing the command anyway would bake in the
+// same guess the fallback chain forbids, so report it and let the user supply
+// the missing piece.
+const plan = {
+  status: detected.missing ? "incomplete" : "detected",
+  stack: detected.stack,
+  evidence: detected.evidence,
+  skills: {},
+  written: [],
+  skipped: [],
+};
+if (detected.missing) plan.missing = detected.missing;
 
 for (const [name, command] of Object.entries(commands)) {
   const path = join(dir, ".claude", "skills", name, "SKILL.md");
   const exists = existsSync(path);
   plan.skills[name] = { command, exists, path: join(".claude/skills", name, "SKILL.md") };
+  // Skipping an existing skill is right — a hand-tuned one beats a generated
+  // one — but skipping it silently means nobody ever checks whether it still
+  // runs anything. Which fence in the file holds the real command is not
+  // something a regex can settle, so name the file and demand it be read.
+  if (exists) {
+    plan.skills[name].mustVerify =
+      "Already present, so it will not be overwritten — and it has never been checked. Read this file, run the command it states, and confirm a non-zero test count before trusting it.";
+  }
 
-  if (!write) continue;
+  if (!write || detected.missing) continue;
   if (exists) {
     plan.skipped.push(name);
     continue;
