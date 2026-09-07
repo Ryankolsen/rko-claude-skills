@@ -1,7 +1,7 @@
 ---
 name: agent-architect
 description: Designs a new subagent. Given a description of an agent someone wants, inventories the skills that already exist, researches prior art, and returns a build spec — proposed frontmatter, the skills it should delegate to, and the skill gaps that must be filled first. Use when the user wants to create, design, or scope a new agent, or asks what a proposed agent would need.
-model: inherit
+model: sonnet
 color: cyan
 tools: Read, Glob, Grep, Bash, WebSearch, WebFetch, Write, Edit, Skill
 ---

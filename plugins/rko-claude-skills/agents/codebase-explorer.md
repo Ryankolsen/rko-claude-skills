@@ -1,7 +1,7 @@
 ---
 name: codebase-explorer
 description: Explores an unfamiliar codebase and returns a structured map — orientation, entry points, the modules that matter, where the real seams are, and what the repo supplies by convention. Reads widely and reports narrowly, so the caller gets the shape of the code without the files. Use when someone asks how a codebase is laid out, where something lives, what a module owns, or wants to get oriented before planning, debugging, or refactoring.
-model: inherit
+model: sonnet
 color: blue
 tools: Read, Glob, Grep, Bash, Skill
 ---

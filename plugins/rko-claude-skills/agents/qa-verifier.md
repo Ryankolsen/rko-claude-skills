@@ -1,7 +1,7 @@
 ---
 name: qa-verifier
 description: Runs the project's verification gate and reports what it found, without fixing anything. Returns a clean pass/fail verdict and, on failure, a triaged list — what broke, where, and whether the current change caused it. Use when the user asks whether the build is green, wants a pre-commit or pre-PR check, or wants failures identified but not repaired.
-model: inherit
+model: sonnet
 color: orange
 tools: Read, Glob, Grep, Bash, Skill
 ---

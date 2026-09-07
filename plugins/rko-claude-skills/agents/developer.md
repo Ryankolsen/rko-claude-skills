@@ -1,7 +1,7 @@
 ---
 name: developer
 description: Builds one already-specified unit of work — a phase or slice of a written plan — in its own context, then reports what it changed and what its tests said. Also runs in fix mode, taking a triaged failure report and repairing the named findings. Use when an orchestrator wants a planned phase implemented by a subagent instead of in the main thread, or wants independent slices built in parallel. It cannot interview anyone, so it refuses work that is not already specified, and it never certifies its own work — the verdict belongs to `qa-verifier`.
-model: inherit
+model: sonnet
 color: yellow
 tools: Read, Glob, Grep, Bash, Write, Edit, Skill
 ---

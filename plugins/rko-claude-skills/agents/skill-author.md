@@ -1,7 +1,7 @@
 ---
 name: skill-author
 description: Drafts a SKILL.md from a specification the user has already approved, then self-checks it against the write-a-skill rubric before returning. Use when a skill gap has been identified and agreed, and the requirements for filling it are settled. Not for deciding what a skill should do — that needs an interview the user must be present for.
-model: inherit
+model: sonnet
 color: green
 tools: Read, Glob, Grep, Write, Skill
 ---
