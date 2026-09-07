@@ -37,6 +37,16 @@ and a subagent has no user to ask, so `true` severs exactly the delegation the
 name was created for. `verify` is the tempting case, being the expensive gate;
 it is also the case that breaks `qa-verifier` outright.
 
+## Which skills a model may invoke
+
+`disable-model-invocation` decides whether a skill is in the Skill tool at all, so it states who may *start* the work — not how eagerly the skill is selected. Every skill falls on one of two sides, and which side it is on should be settled before it is written.
+
+**`false` — procedure and vocabulary.** A body of rules an agent consults partway through work it is already doing, such as `tdd`, `commit-safety`, or `codebase-design`. These must be invocable: the caller is usually a subagent, which has no user to type anything.
+
+**`true` — a workflow a person starts.** A skill that interviews the user, or an entry point someone chooses deliberately, such as `write-a-prd`, `prd-to-issues`, or `delegate-work`. Interviewing is the reliable tell — a skill that questions the user one point at a time is a conversation with nobody when a subagent runs it.
+
+**An agent that needs a `true` skill names it and stops.** It does not reproduce the workflow by other means. A hand-rolled substitute is exactly what the flag exists to prevent: it yields output shaped like the skill's that was not made the way the skill makes it, and no one downstream can tell the difference. `qa-verifier` is the worked example — it cannot run `setup-project-skills`, so it names it as the remedy and leaves the decision with the user. Say which skill is needed and why; the user types it.
+
 ## Fallback chain
 
 When a generic capability needs to run something and the reserved skill is absent, it works down this list. The order is the contract, and the last step is not optional.
