@@ -53,10 +53,15 @@ to comment at all. Never guess an issue URL scheme.
 because a loop that cannot converge burns tokens indefinitely, and only you can
 see the count — a subagent cannot.
 
-1. **Spawn `developer`.** On attempt 1 give it build mode: the issue text, how
-   done is judged, the repo path and branch, and what is out of scope. On later
-   attempts give it fix mode: the previous triage, which findings are its own,
-   and the original issue so it repairs toward the design already chosen.
+1. **On attempt 1, spawn `developer`** in build mode: the issue text, how done
+   is judged, the repo path and branch, and what is out of scope. **On every
+   later attempt, resume that same `developer`** (message the agent you already
+   have, do not spawn a new one) with fix mode: the triage, which findings are
+   its own, and the original issue so it repairs toward the design already
+   chosen. It already holds the plan and the files it read on attempt 1 — a
+   fresh spawn would pay to re-read all of that on every retry to relearn what
+   this one still remembers. Resuming is safe here because fix mode only adds
+   new findings to repair, never a reason to doubt what it already built.
 2. **Spawn `qa-verifier`** on the tree the developer left dirty. It runs the
    gate *and* peer-reviews the diff, and it owns the verdict. Never accept the
    developer's own account of whether the work is correct. **Pass it the issue's
@@ -89,8 +94,13 @@ target, and two signals mean the loop has stopped converging:
 Bail on either and say which fired. An early bail with a clear reason beats
 three more attempts and a bigger diff to read.
 
-Spawn one agent at a time: they share a working tree, and two writers in one
+Run one agent at a time: they share a working tree, and two writers in one
 tree corrupt each other. Parallel slices need separate worktrees — not this loop.
+
+**Always spawn `qa-verifier` fresh, never resume one.** It is the reverse case
+from `developer`: its value is judging the tree without any memory of having
+blessed an earlier version of it, so a resumed `qa-verifier` that already said
+green once is exactly the rubber stamp this loop spawns it to prevent.
 
 **Spawn every agent without a `model` override.** Each one's frontmatter already
 declares the model it is meant to run on, and that declaration is the decision.
