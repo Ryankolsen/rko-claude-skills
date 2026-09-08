@@ -42,6 +42,12 @@ that order is the closest thing to a priority signal available. Skip issues that
 are not ready, and do not reorder around a blocker to keep busy — working the
 wrong issue does not clear the right one.
 
+**When several ready issues don't block each other**, they are a batch and can
+be worked at once instead of one at a time — see "Running independent issues
+in parallel" in [SKILL.md](SKILL.md). Take ready issues in number order up to
+the budget; a later one is not skipped just because an earlier one is also
+ready, as long as neither is in the other's `Blocked by` field.
+
 If open issues remain but none is ready, **stop and say so**. Everything blocked
 is a dependency problem, and no amount of work on this run will resolve it.
 
@@ -62,6 +68,7 @@ past a bail because the next issue looks unrelated. Both are the user's call.
 One line per issue as you go, so a watching user sees progress. At the end:
 
 - **Each issue** — number, outcome, attempts used, and the commit if it landed.
+  For a parallel batch, also its branch name and worktree path.
 - **Why the run stopped** — which of the four conditions fired, naming the issue
   if it was a bail.
 - **Review findings** — what `code-reviewer` returned per issue, gathered. They

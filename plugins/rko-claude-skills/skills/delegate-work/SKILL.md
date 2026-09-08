@@ -201,6 +201,56 @@ converge is often what the next one builds on. Keep only each issue's outcome �
 the triage is already on the issue, and carrying five loops of it makes this as
 expensive as doing the work yourself.
 
+## Running independent issues in parallel
+
+Ready issues that do not block each other can be worked at the same time
+instead of in sequence — each gets its own git worktree, so their
+`developer`/`qa-verifier` loops never share a tree and cannot corrupt one
+another the way *The loop* above warns about.
+
+**When this applies.** Among the ready issues (per BACKLOG.md), a *batch* is
+the set that are mutually independent — none blocks another still in the
+batch. `prd-to-issues` writes each issue's `Blocked by` field explicitly, so
+this is read off the issues, not guessed. Take ready issues in number order up
+to the budget; you are not restricted to the single lowest number when the
+ones after it are equally unblocked by anything else in scope.
+
+**How to run a batch.** For each issue in the batch, spawn a fresh agent
+(`general-purpose` is fine — it needs full tool access, since it will spawn
+`developer`/`qa-verifier` itself) with `isolation: "worktree"`, and give it the
+entire per-issue loop from this skill (*The loop*, *Commenting on the issue*,
+*On green*, *Bailing*) as its prompt, along with the issue URL — a fresh agent
+starts with none of this skill's context, so summarizing it away costs it the
+rules that keep the loop safe. Launch every agent in the batch in one message:
+this is the one case in this skill where multiple `Agent` calls belong in
+parallel, precisely because `isolation: "worktree"` gives each call its own
+copy of the tree to work on.
+
+Each spawned agent is now the orchestrator for its one issue: it holds its own
+attempt count, spawns `developer`/`qa-verifier` itself, comments on its issue,
+and commits locally on its own branch inside its own worktree exactly as *On
+green* describes. You do not see its intermediate steps, only its final
+report.
+
+**After the batch finishes.** Collect each agent's report — issue number,
+outcome, attempts used — and, from the `Agent` tool's own result, the branch
+name and worktree path wherever it committed. None of these branches are
+merged, pushed, or reconciled against each other; that stays the user's
+decision, same as any other commit this skill makes. Report all of it as one
+list, worktree paths included, so the user can review and merge each one (or
+ask you to, issue by issue, once they've looked).
+
+**A bail inside a batch bails only that issue.** *Bailing*'s "a bail stops
+every remaining issue too" is about the sequential queue, where the next issue
+may build on the one that just failed. In a batch the issues are independent
+by definition, so one bailing changes nothing for its siblings — let the rest
+finish and report the bailed one alongside them.
+
+**Do not parallelize issues that are not siblings.** If an issue in the
+requested count is blocked by another issue also in scope for this run, work
+them sequentially as usual; only spawn a worktree agent for the ones with
+nothing left to wait on.
+
 ## What you must not do
 
 **Do not implement.** Not even the one-line fix that would obviously clear the
