@@ -1,7 +1,7 @@
 # Choosing the next issue
 
-How the queue is read when `delegate-work` is given `next N` rather than a single
-issue. The per-issue loop itself is in [SKILL.md](SKILL.md).
+How the queue is read when `delegate-work` is given a number rather than a single
+issue. Building, merging, and verifying are in [SKILL.md](SKILL.md).
 
 ## Read the queue
 
@@ -34,43 +34,56 @@ the queue skips it.
 ## Readiness
 
 An issue is **ready** when every issue named in its `Blocked by` field is
-closed. `prd-to-issues` writes that field, so this is structure the queue
-already carries, not something to infer from prose.
+either closed or also in scope for this run. `prd-to-issues` writes that field,
+so this is structure the queue already carries, not something to infer from
+prose. A blocker in scope does not make an issue wait — it puts the issue in a
+later wave, built after its blocker has merged into the branch (see "Plan the
+waves" in [SKILL.md](SKILL.md)).
 
-Among ready issues take the **lowest number**: phases are written in order, and
-that order is the closest thing to a priority signal available. Skip issues that
-are not ready, and do not reorder around a blocker to keep busy — working the
-wrong issue does not clear the right one.
-
-**When several ready issues don't block each other**, they are a batch and can
-be worked at once instead of one at a time — see "Running independent issues
-in parallel" in [SKILL.md](SKILL.md). Take ready issues in number order up to
-the budget; a later one is not skipped just because an earlier one is also
-ready, as long as neither is in the other's `Blocked by` field.
+Fill the budget from ready issues in **number order**: phases are written in
+order, and that order is the closest thing to a priority signal available. An
+issue blocked by something open and *not* in scope is skipped, and so is
+anything depending on it; do not reorder around a blocker to keep busy —
+working the wrong issue does not clear the right one.
 
 If open issues remain but none is ready, **stop and say so**. Everything blocked
 is a dependency problem, and no amount of work on this run will resolve it.
 
 ## When to stop
 
-Four conditions, all of which end the run rather than pausing it:
+Five conditions, all of which end the run rather than pausing it:
 
-- **The budget is reached** — the count the user gave.
+- **The budget is reached** — the count the user gave. It caps how many issues
+  are picked, before any are built.
 - **No ready issues remain** — either the queue is empty or the rest are blocked.
-- **An issue bailed** — stop immediately, leaving the tree dirty.
+- **Verification finished** — green, or red twice with the remainder ticketed
+  per *Ticketing what remains* in [SKILL.md](SKILL.md).
+- **The run bailed** — per *Bailing* in [SKILL.md](SKILL.md), leaving the branch
+  and any worktrees as they are.
 - **The tracker cannot be reached** — say so rather than proceeding blind.
 
-Never raise the budget because the queue is nearly empty, and never continue
-past a bail because the next issue looks unrelated. Both are the user's call.
+A developer reporting blocked during *Build* is not a stop condition: that issue
+and its dependents drop out, and its siblings carry on to the merge.
+
+Never raise the budget because the queue is nearly empty. That is the user's
+call.
 
 ## Reporting a run
 
-One line per issue as you go, so a watching user sees progress. At the end:
+One line per wave as it is planned, and one per issue as its developer reports,
+so a watching user sees progress. At the end:
 
-- **Each issue** — number, outcome, attempts used, and the commit if it landed.
-  For a parallel batch, also its branch name and worktree path.
-- **Why the run stopped** — which of the four conditions fired, naming the issue
-  if it was a bail.
-- **Review findings** — what `code-reviewer` returned per issue, gathered. They
-  are for the user; none of them re-entered any loop.
-- **State of the tree** — clean, or dirty from a bail and worth inspecting.
+- **Each issue** — number, outcome (merged, dropped as blocked, or dependent of
+  a blocked issue), and its commits. For one that did not merge, its worktree
+  path.
+- **Verification** — runs used (one or two), the final verdict, which issues
+  the fix pass went to, and any findings tagged `pre-existing` or advisory.
+- **Tickets opened** — each new issue, the original it came from, and what it
+  says is still wrong.
+- **Why the run stopped** — which condition fired.
+- **Cleanup ticket** — the issue opened from `standards-reviewer` and
+  `clean-code-reviewer`'s findings, or that there was nothing to file. None of
+  them re-entered any loop.
+- **State of the branch** — the base SHA, the commits added since, that none are
+  pushed, and whether they passed verification. If the run ended red, say the
+  branch must not be pushed until its tickets are resolved.
