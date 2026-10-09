@@ -13,6 +13,8 @@ Execute a complete unit of work: plan it, build it, validate it, commit it.
 
 ### 1. Understand the task
 
+If the repository supplies one, invoke the project's `project-guide` skill first. It names the stack skills that apply to which files and tasks; follow its routes for the rest of the work, invoking each routed skill before touching the files it covers. If there is none, carry on — it is optional, and its absence is not a question for the user.
+
 Read any referenced plan or PRD. Explore the codebase to understand the relevant files, patterns, and conventions. If the task is ambiguous, ask the user to clarify scope before proceeding.
 
 ### 2. Plan the implementation (optional)

@@ -2,9 +2,11 @@
 
 A curated library of Claude Code skills for software development workflows.
 
-Every skill here is **stack-agnostic**. Nothing names a package manager or a
+The core skills are **stack-agnostic**. Nothing names a package manager or a
 build command; skills that need to run something delegate to a reserved skill
-name the consuming repository supplies. See
+name the consuming repository supplies. Stack-specific skills (currently
+Drupal) ship alongside them, and the generic skills only reach them in a
+repository whose `project-guide` routes there. See
 [CONVENTIONS.md](plugins/rko-claude-skills/CONVENTIONS.md).
 
 ## Installation
@@ -20,9 +22,14 @@ name the consuming repository supplies. See
 |-------|-------------|
 | `run-tests` | Tests only — fast enough to call on every red-green cycle |
 | `verify` | The full pre-commit gate: typecheck, lint, tests, build |
+| `project-guide` | *Optional.* Routes work to the stack skills that apply, and states the site's own commands and constraints |
 
 A skill that cannot find one works down a fixed fallback chain — repository
 documentation, then auto-detection, then asking — and never guesses a command.
+A missing `project-guide` just means the generic skills work alone.
+
+`setup-project-skills` writes all three, offering `project-guide` only on a
+stack this plugin has skills for.
 
 ## Agents
 
@@ -91,6 +98,17 @@ skills claiming one job make that pick a coin toss.
 | `commit-message` | Group pending changes into logical commits and write each message |
 | `resolving-merge-conflicts` | Resolve an in-progress merge or rebase conflict |
 | `git-guardrails-claude-code` | Hooks that block dangerous git commands before they execute |
+
+### Drupal
+
+Reached through a Drupal repository's `project-guide`, or directly by name. No
+generic skill names it — the validator checks that. Its procedures for fields,
+Views, Twig, and contrib patches are reference files, loaded only when a task
+needs one.
+
+| Skill | Description |
+|-------|-------------|
+| `drupal-conventions` | Drupal rules and procedures: fields and Views via config YAML, Twig and preprocess, Composer patches, cache metadata, and slicing Drupal work |
 
 ### Meta
 

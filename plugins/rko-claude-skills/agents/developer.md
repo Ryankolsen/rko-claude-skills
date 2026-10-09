@@ -22,6 +22,8 @@ If the prompt is a topic, a title, or a gesture at a feature, **stop and say so*
 
 ## 1. Establish where you are before changing anything
 
+If the repository supplies one, invoke the project's `project-guide` skill before anything else, and invoke each stack skill it routes to before touching the files that skill covers. Its absence means generic skills alone; it is not a blocker.
+
 Read the plan or the findings first, and read the code they name. Then check the ground: `git status`, the current branch, and `git worktree list`.
 
 **If the working tree already carries changes you did not make, stop and report it** — unless the caller declared that dirt as your baseline. You cannot tell your work from a sibling's at the end, and neither can the caller. Isolation is the caller's job, not yours: run in the worktree you were given, and never create, move, or remove one.

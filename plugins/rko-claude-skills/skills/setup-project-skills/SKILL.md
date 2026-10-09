@@ -1,6 +1,6 @@
 ---
 name: setup-project-skills
-description: Set up a repository with the reserved skill names that generic skills and agents depend on, by detecting how the project runs its tests and checks, and offer a pre-commit hook wired to the same gate if none exists. Use when adopting this plugin in a new repository, when a skill reports it cannot find run-tests or verify, when `delegate-work` reports no test-running commit hook was found, or when the user asks to bootstrap or configure project skills.
+description: Set up a repository with the reserved skill names that generic skills and agents depend on, by detecting how the project runs its tests and checks, offer a pre-commit hook wired to the same gate if none exists, and offer a project-guide when the stack has skills in this plugin. Use when adopting this plugin in a new repository, when a skill reports it cannot find run-tests or verify, when `delegate-work` reports no test-running commit hook was found, or when the user asks to bootstrap or configure project skills.
 domain: project-bootstrap
 disable-model-invocation: true
 ---
@@ -12,7 +12,8 @@ reserved name, and the repository supplies it. This bootstraps a repository's
 side of that contract — see
 [CONVENTIONS.md](../../CONVENTIONS.md) for the contract itself.
 
-Result: `.claude/skills/run-tests/` and `.claude/skills/verify/`, as plain
+Result: `.claude/skills/run-tests/` and `.claude/skills/verify/` — and, on a
+stack this plugin has skills for, `.claude/skills/project-guide/` — as plain
 editable files that are useful with or without any agent installed.
 
 ## 1. Probe, and write nothing yet
@@ -85,7 +86,7 @@ holding a `pre-commit` file. Read it far enough to tell whether it actually runs
 tests, rather than existing for something unrelated (formatting, commit-message
 linting).
 
-If a hook already runs tests, say so and stop here — do not add a second one.
+If a hook already runs tests, say so and go on to step 6 — do not add a second one.
 
 If none does, ask the user before writing anything: offer to add
 `.git/hooks/pre-commit` that runs this repository's `verify` command (from step
@@ -98,6 +99,26 @@ tool's own convention instead of writing a competing plain hook.
 Never install a hook the user did not approve, and never overwrite one that
 already exists — if it runs something other than tests, that's someone's
 deliberate choice to leave alone; mention it and move on.
+
+## 6. Offer a `project-guide`, if the stack has skills here
+
+`project-guide` is optional — see [CONVENTIONS.md](../../CONVENTIONS.md). Offer
+one only when this plugin carries skills for the repository's stack, and only
+on evidence a reader could check:
+
+| Evidence | Template |
+|---|---|
+| `composer.json` requires `drupal/core` or `drupal/core-recommended` | [templates/project-guide-drupal.md](templates/project-guide-drupal.md) |
+
+If nothing matches, say there is no stack guide to offer and stop. If
+`.claude/skills/project-guide/SKILL.md` already exists, leave it alone.
+
+Otherwise show the user the template, then fill in its *This site* section from
+what the repository plainly states — a `.ddev/` or `.lando.yml` directory for the
+environment prefix, scripts or custom commands for code style and analysis, a
+config-split directory for the config layout. Anything you cannot find stays a
+placeholder for the user to fill; never guess a command. Write it to
+`.claude/skills/project-guide/SKILL.md` only once they approve.
 
 ## When the binary is missing
 
