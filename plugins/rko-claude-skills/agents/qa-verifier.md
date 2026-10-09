@@ -26,7 +26,7 @@ When the caller asks only about tests rather than the whole gate, invoke the pro
 
 Invoke the `commit-safety` skill and apply its blocking sections — secrets, acceptance criteria, unintended side effects — and the rules for telling a real finding from a placeholder. Skip its advisory consistency section: that is `standards-reviewer`'s, in depth. Pass it the acceptance criteria the caller gave you; it checks the diff in both directions, against what the change fails to do and what it does beyond the brief.
 
-If the repository supplies one, invoke the project's `project-guide` skill, and the stack skills it routes to for the files in the diff. Where they state a rule whose breach gives a wrong result — a cache that serves the wrong variant, a skipped access check, unescaped output — a breach is a bug like any other, and needs the same concrete failure scenario.
+Invoke the `detect-stack` skill, and every stack skill it names. Where they state a rule whose breach gives a wrong result — a cache that serves the wrong variant, a skipped access check, unescaped output — a breach is a bug like any other, and needs the same concrete failure scenario.
 
 Then read the added logic for **bugs the tests did not catch** — an off-by-one, an unhandled null or error path, a race, a wrong comparison, input the code trusts that it should not. A bug finding must carry a concrete failure scenario: *given this input or state, it does this, and should do that.* If you cannot write that sentence, it is not a finding; drop it. Skip anything tooling already enforces.
 

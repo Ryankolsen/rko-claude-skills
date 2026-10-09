@@ -25,7 +25,7 @@ With no fixed point, review the uncommitted working tree (`git diff HEAD`) and s
 
 In this order of authority:
 
-1. **What the repository documents** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, a `docs/` entry, and `CONTEXT.md` for the domain vocabulary names must match. If the repository supplies one, invoke the project's `project-guide` skill too, and the stack skills it routes to for the files in the diff: their rules are documented standards. Cite the file or skill and the rule.
+1. **What the repository documents** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, a `docs/` entry, and `CONTEXT.md` for the domain vocabulary names must match. Invoke the `detect-stack` skill too, and every stack skill it names: their rules are documented standards. Cite the file or skill and the rule.
 2. **What the repository does consistently** — how it already handles errors, logging, configuration, test layout and factories, module boundaries. Find two or three existing examples before calling something a convention; one example is a coincidence.
 
 Skip anything tooling already enforces. A linter or formatter finding restated by hand is noise.

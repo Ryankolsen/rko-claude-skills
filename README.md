@@ -5,8 +5,8 @@ A curated library of Claude Code skills for software development workflows.
 The core skills are **stack-agnostic**. Nothing names a package manager or a
 build command; skills that need to run something delegate to a reserved skill
 name the consuming repository supplies. Stack-specific skills (currently
-Drupal) ship alongside them, and the generic skills only reach them in a
-repository whose `project-guide` routes there. See
+Drupal) ship alongside them; the generic skills reach them only through
+`detect-stack`, which decides from evidence in the repository. See
 [CONVENTIONS.md](plugins/rko-claude-skills/CONVENTIONS.md).
 
 ## Installation
@@ -22,14 +22,9 @@ repository whose `project-guide` routes there. See
 |-------|-------------|
 | `run-tests` | Tests only — fast enough to call on every red-green cycle |
 | `verify` | The full pre-commit gate: typecheck, lint, tests, build |
-| `project-guide` | *Optional.* Routes work to the stack skills that apply, and states the site's own commands and constraints |
 
 A skill that cannot find one works down a fixed fallback chain — repository
 documentation, then auto-detection, then asking — and never guesses a command.
-A missing `project-guide` just means the generic skills work alone.
-
-`setup-project-skills` writes all three, offering `project-guide` only on a
-stack this plugin has skills for.
 
 ## Agents
 
@@ -101,8 +96,9 @@ skills claiming one job make that pick a coin toss.
 
 ### Drupal
 
-Reached through a Drupal repository's `project-guide`, or directly by name. No
-generic skill names it — the validator checks that. Its procedures for fields,
+Applied automatically when `detect-stack` finds a Drupal site — `composer.json`
+requiring `drupal/core`, a `core/lib/Drupal.php`, or a module's `.info.yml`. No
+generic skill names it; the validator checks that. Its procedures for fields,
 Views, Twig, and contrib patches are reference files, loaded only when a task
 needs one.
 
@@ -116,6 +112,7 @@ needs one.
 |-------|-------------|
 | `write-a-skill` | Create new skills with proper structure and progressive disclosure |
 | `trim-a-skill` | Shrink a bloated SKILL.md without losing facts: move detail to reference files, cut what the agent already knows, prove it lossless |
+| `detect-stack` | Detect the repository's stack from evidence and name the stack skills that apply |
 | `setup-project-skills` | Detect how a repo runs its checks and generate its `run-tests` and `verify` skills |
 | `teach` | Teach a new skill or concept within this workspace |
 | `handoff` | Compact the conversation into a handoff document for another agent |

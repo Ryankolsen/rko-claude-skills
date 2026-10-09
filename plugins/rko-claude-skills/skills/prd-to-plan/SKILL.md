@@ -19,7 +19,7 @@ The PRD should already be in the conversation. If it isn't, ask the user to past
 
 If you have not already explored the codebase, do so to understand the current architecture, existing patterns, and integration layers.
 
-If the repository supplies one, invoke the project's `project-guide` skill, and the stack skills it routes planning to. They name the stack's building blocks, where they live, and its natural slice order — use them in steps 3 and 4.
+Invoke the `detect-stack` skill, and every stack skill it names. They name the stack's building blocks, where they live, and its natural slice order — use them in steps 3 and 4.
 
 ### 3. Identify durable architectural decisions
 

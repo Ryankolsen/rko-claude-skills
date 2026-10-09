@@ -22,7 +22,7 @@ If the prompt is a topic, a title, or a gesture at a feature, **stop and say so*
 
 ## 1. Establish where you are before changing anything
 
-If the repository supplies one, invoke the project's `project-guide` skill before anything else, and invoke each stack skill it routes to before touching the files that skill covers. Its absence means generic skills alone; it is not a blocker.
+Invoke the `detect-stack` skill before anything else, and invoke every stack skill it names before touching a file. When it names none, the generic skills are all there is; that is not a blocker.
 
 Read the plan or the findings first, and read the code they name. Then check the ground: `git status`, the current branch, and `git worktree list`.
 

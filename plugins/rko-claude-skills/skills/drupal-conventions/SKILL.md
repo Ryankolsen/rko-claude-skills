@@ -1,6 +1,6 @@
 ---
 name: drupal-conventions
-description: Drupal working rules and procedures — adding or removing a field via config YAML, hand-editing a View's YAML, Twig templates and preprocess hooks, patching contrib or core with Composer, cache metadata, and exploring and slicing Drupal work for a plan. Use when building, planning, or reviewing work on a Drupal site, or when a repository's project-guide routes Drupal work here.
+description: Drupal working rules and procedures — adding or removing a field via config YAML, hand-editing a View's YAML, Twig templates and preprocess hooks, patching contrib or core with Composer, cache metadata, and exploring and slicing Drupal work for a plan. Use when building, planning, or reviewing work on a Drupal site, or when detect-stack names it.
 domain: drupal-conventions
 stack: drupal
 disable-model-invocation: false
@@ -8,10 +8,10 @@ disable-model-invocation: false
 
 # Drupal Conventions
 
-Rules that hold on any Drupal site. What is particular to one site — the
-local-env prefix (`ddev`, `lando`, or none), its code-style and static-analysis
-commands, its frontend build, multisite layout, accessibility bar — lives in
-that repository's `project-guide` skill, not here.
+Rules that hold on any Drupal site. Prefix Drush and Composer commands with the
+`envPrefix` that `detect-stack` reported (`ddev`, `lando`), or run them bare
+when it was `null`. How this site runs its tests and checks belongs to the
+project's `run-tests` and `verify` skills, not here.
 
 ## Procedures
 

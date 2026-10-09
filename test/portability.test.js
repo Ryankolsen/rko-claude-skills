@@ -9,10 +9,10 @@ import { STACK_SPECIFIC } from "../lib/conventions.js";
 const PACKAGE_MANAGER = /\b(?:pnpm|npm|npx|yarn|bun)\s+[a-z<][\w:<>./-]*/g;
 
 test("no generic skill or agent names a stack skill", () => {
-  // A generic capability reaches a stack skill only through the repository's
-  // project-guide. Naming one directly would make "works on any codebase" a
-  // promise instead of a property: the route would fire in every repository,
-  // Drupal or not.
+  // A generic capability reaches a stack skill only through detect-stack,
+  // which decides from evidence in the repository. Naming one directly would
+  // make "works on any codebase" a promise instead of a property: the route
+  // would fire in every repository, Drupal or not.
   const skills = loadSkills();
   const stackSkills = skills.filter((s) => s.frontmatter.stack).map((s) => s.name);
   const generic = [...skills.filter((s) => !s.frontmatter.stack), ...loadAgents()];
@@ -21,7 +21,7 @@ test("no generic skill or agent names a stack skill", () => {
   for (const unit of generic) {
     for (const name of stackSkills) {
       if (unit.body.includes(`\`${name}\``)) {
-        offenders.push(`${unit.relativePath} names the stack skill \`${name}\` — route it through project-guide`);
+        offenders.push(`${unit.relativePath} names the stack skill \`${name}\` — route it through detect-stack`);
       }
     }
   }

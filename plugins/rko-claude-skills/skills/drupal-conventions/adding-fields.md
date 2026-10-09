@@ -1,6 +1,6 @@
 # Adding a Field to a Bundle
 
-> Commands below use `ddev`. If the project's `project-guide` names another environment prefix (`lando`, or none), use that instead.
+> Commands below use `ddev`. Use the `envPrefix` that `detect-stack` reported instead — `lando`, or none when it was `null`.
 
 `{entity}` = entity type machine name, singular (`node`, `taxonomy_term`, `media`, …). `{bundle}` = bundle machine name.
 Copy a sibling field's YAML and retarget `id:` / `bundle:` — don't hand-author.
@@ -71,7 +71,6 @@ ddev drush cim -y
 ddev drush cr
 ```
 
-Then run whatever extra checks the project's `project-guide` names for config or PHP changes.
 
 QA: edit form shows the widget, save persists, full view and any listing
 modes (teaser / search_result / custom) render or hide as intended, and any

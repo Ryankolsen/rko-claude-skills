@@ -26,9 +26,6 @@ The full pre-commit gate: typecheck, lint, tests, build — whatever this reposi
 
 A repository that has only tests may implement `verify` as running the tests. What it must not do is claim a check it does not perform.
 
-### `project-guide`
-
-Routes work to the stack skills that apply, and states the site's own commands. **Optional**: when it is absent, carry on with the generic skills — no fallback chain, no question to the user.
 
 ## Reserved names are always model-invocable
 
@@ -87,7 +84,7 @@ When in doubt, choose workflow. A skill that fails to trigger is a minor annoyan
 
 ## Stack-specific skills
 
-A skill that only makes sense on one stack declares it (`stack: drupal`) and prefixes its domain with it. Generic skills and agents never name one; they reach it only through a repository's `project-guide`. The validator enforces both.
+A skill that only makes sense on one stack declares it (`stack: drupal`) and prefixes its domain with it. Generic skills and agents never name one: they invoke the `detect-stack` skill, whose script decides from evidence in the repository which stack skills apply. The validator enforces all three.
 
 ## Adding a reserved name
 

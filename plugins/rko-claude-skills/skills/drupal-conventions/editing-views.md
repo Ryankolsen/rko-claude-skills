@@ -1,6 +1,6 @@
 # Editing View YAML Directly
 
-> Commands below use `ddev`. If the project's `project-guide` names another environment prefix (`lando`, or none), use that instead.
+> Commands below use `ddev`. Use the `envPrefix` that `detect-stack` reported instead — `lando`, or none when it was `null`.
 
 Views YAML has many handler-specific keys that aren't inferrable from neighboring entries. A hand-authored filter often works functionally but drifts from the canonical export shape — the drift shows up the next time someone opens the View in the UI and re-exports. This skill keeps the edit close to canonical from the start, and verifies it.
 
