@@ -137,9 +137,12 @@ nothing to merge.
 **On a conflict**, do not resolve it yourself — that is writing code. Resume
 the `developer` whose branch is being merged, in fix mode, telling it to work in
 the main repository path rather than its worktree: the conflicted files are the
-findings, the other side's issue is context, and it should invoke the
-`resolving-merge-conflicts` skill and leave the result unstaged for you. Then
-stage those files by name and conclude the merge with `git commit --no-edit`.
+findings, the other side's issue is context, and **the in-progress merge is its
+declared baseline** — say so, or its dirty-tree check will stop it. Tell it to
+use the `resolving-merge-conflicts` skill for understanding and resolving the
+hunks only, and to skip that skill's checks, staging, and commit: the checks are
+*Verify*'s job, and the merge commit is yours. It leaves the result unstaged.
+Then stage those files by name and conclude the merge with `git commit --no-edit`.
 If it reports blocked, abort the merge (`git merge --abort`), treat that issue
 as blocked per *Build*, and continue with the rest.
 
