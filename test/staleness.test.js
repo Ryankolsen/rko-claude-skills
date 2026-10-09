@@ -4,20 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 
 import { loadSkills, loadRepoSkills, repoRoot } from "../lib/skills.js";
-import { STACK_SPECIFIC } from "../lib/conventions.js";
 
 /** Code fences hold templates and examples, which name files that need not exist. */
 const withoutCodeFences = (body) => body.replace(/```[\s\S]*?```/g, "");
-
-test("every exemption names a skill that exists", () => {
-  const names = new Set(loadSkills().map((s) => s.name));
-
-  const dead = [...STACK_SPECIFIC.keys()]
-    .filter((name) => !names.has(name))
-    .map((name) => `exemption for "${name}", which is not a skill in this plugin`);
-
-  assert.deepEqual(dead, [], "a dead exemption silently weakens the rule it belongs to");
-});
 
 test("every skill the README names exists, and every skill is in the README", () => {
   const readme = readFileSync(join(repoRoot, "README.md"), "utf8");

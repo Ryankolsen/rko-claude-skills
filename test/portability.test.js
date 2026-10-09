@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 
 import { loadSkills } from "../lib/skills.js";
 import { loadAgents } from "../lib/agents.js";
-import { STACK_SPECIFIC } from "../lib/conventions.js";
 
 /** Matches a placeholder form (`pnpm <name>`) too — naming a stack is naming a stack. */
 const PACKAGE_MANAGER = /\b(?:pnpm|npm|npx|yarn|bun)\s+[a-z<][\w:<>./-]*/g;
@@ -41,7 +40,8 @@ test("no generic skill names a package manager", () => {
   const offenders = [];
 
   for (const skill of loadSkills()) {
-    if (STACK_SPECIFIC.has(skill.name)) continue;
+    // A stack skill is about its stack's tools, so naming them is its job.
+    if (skill.frontmatter.stack) continue;
 
     for (const [match] of skill.body.matchAll(PACKAGE_MANAGER)) {
       offenders.push(`${skill.relativePath}: "${match.trim()}" — delegate to a reserved name instead`);

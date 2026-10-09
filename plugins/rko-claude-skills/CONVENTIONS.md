@@ -84,7 +84,7 @@ When in doubt, choose workflow. A skill that fails to trigger is a minor annoyan
 
 ## Stack-specific skills
 
-A skill that only makes sense on one stack declares it (`stack: drupal`) and prefixes its domain with it. Generic skills and agents never name one: they invoke the `detect-stack` skill, whose script decides from evidence in the repository which stack skills apply. The validator enforces all three.
+A skill that only makes sense on one stack declares it (`stack: drupal`) and prefixes its domain with it. Unlike a generic skill, it may name its stack's tools. Generic skills and agents never name one: they invoke the `detect-stack` skill, whose script decides from evidence in the repository which stack skills apply. The validator enforces all three.
 
 ## Adding a reserved name
 
