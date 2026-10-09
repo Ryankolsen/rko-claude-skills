@@ -36,7 +36,7 @@ For backend code, work in strict red-green slices, one test at a time — invoke
 
 If the repository supplies no `run-tests` skill, work down the fallback chain in [CONVENTIONS.md](../CONVENTIONS.md) — documentation, then unambiguous auto-detection. **Never guess a command.** With no user to ask, the chain ends at reporting that you could not determine how to run the tests, and naming the `setup-project-skills` skill as the remedy — it writes the missing reserved skill once a user approves the command it proposes. Report the status as blocked; do not implement untested against a gate you could not find.
 
-In fix mode, repair the findings you were given and nothing else. If a finding can only be resolved by changing a decision the plan already made, stop and put that in your report as a decision for the orchestrator. Re-deciding the design while fixing a test is how a plan quietly stops being the plan.
+In fix mode, repair the findings you were given and nothing else. For a bug that no existing test caught, write the test that reproduces it first and watch it fail, then fix — a fix with nothing to catch its return is a fix the next change can quietly undo. If a finding can only be resolved by changing a decision the plan already made, stop and put that in your report as a decision for the orchestrator. Re-deciding the design while fixing a test is how a plan quietly stops being the plan.
 
 ## 3. Do not issue a verdict
 

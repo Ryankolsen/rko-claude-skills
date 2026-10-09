@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs the reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 domain: code-review
 disable-model-invocation: true
 ---
@@ -59,12 +59,14 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
-**Standards** runs as the `code-reviewer` agent, which holds this brief and reads the smell baseline from step 3 itself. Give it:
+**Standards** runs as two agents, spawned alongside Spec so all three run at once:
 
-- The fixed point, the full diff command, and the commit list.
-- The list of standards-source files you found in step 3.
+- **`standards-reviewer`** looks outward — the documented standards from step 3, the conventions the codebase has settled, and existing functions the diff should have reused.
+- **`clean-code-reviewer`** looks inward — duplication within the change, logic worth extracting, and the smell baseline from step 3, which it reads itself.
 
-If that agent is unavailable, spawn a plain sub-agent with the same inputs, the smell baseline from step 3 pasted in full, and the brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
+Give each of them the fixed point, the full diff command, the commit list, and the standards-source files you found in step 3.
+
+If those agents are unavailable, spawn one plain sub-agent with the same inputs, the smell baseline from step 3 pasted in full, and the brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the standard (file + the rule); (b) existing code elsewhere in the repo that the diff duplicates instead of reusing; and (c) any baseline smell you spot, duplication within the diff first: name it and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Every finding cites `path:line`. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** should include:
 
@@ -76,7 +78,7 @@ If the spec is missing, skip the Spec sub-agent and note this in the final repor
 
 ### 5. Aggregate
 
-Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
+Present the reports under `## Standards` (the two Standards agents' reports, one after the other) and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
 

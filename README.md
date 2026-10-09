@@ -30,8 +30,9 @@ documentation, then auto-detection, then asking — and never guesses a command.
 |-------|-------------|
 | `agent-architect` | Design a new agent: inventory existing skills, research prior art, return a build spec |
 | `skill-author` | Draft a SKILL.md from an approved spec, self-checked against the write-a-skill rubric |
-| `qa-verifier` | Run the project's verification gate and report a triaged verdict, without fixing anything |
-| `code-reviewer` | Review a diff against the repo's documented standards and the Fowler smell baseline, reporting findings without fixing them |
+| `qa-verifier` | Run the project's verification gate and review the change for bugs, side effects, and unmet criteria, reporting a triaged verdict without fixing anything |
+| `standards-reviewer` | Review a diff against the codebase — documented conventions, and existing code it should have reused — reporting findings without fixing them |
+| `clean-code-reviewer` | Review a diff's new code for duplication, functions worth extracting, and Fowler code smells, reporting findings without fixing them |
 | `developer` | Build one specified phase of a plan in an isolated context, report status, and leave the verdict to qa-verifier |
 | `codebase-explorer` | Explore a codebase and return a structured map: entry points, modules, seams, and the next skill to reach for |
 
