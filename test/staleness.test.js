@@ -4,27 +4,49 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 
 import { loadSkills, loadRepoSkills, repoRoot } from "../lib/skills.js";
+import { loadAgents } from "../lib/agents.js";
 
 /** Code fences hold templates and examples, which name files that need not exist. */
 const withoutCodeFences = (body) => body.replace(/```[\s\S]*?```/g, "");
 
-test("every skill the README names exists, and every skill is in the README", () => {
+/**
+ * The first-column entries of every table in one "## " section of the README,
+ * as name → whether the row is marked *auto*. Scoped by section because other
+ * tables document different things — the reserved names a repository supplies
+ * are not skills in this plugin.
+ */
+function readmeRows(heading) {
   const readme = readFileSync(join(repoRoot, "README.md"), "utf8");
+  const section = new RegExp(`^## ${heading}$([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, "m").exec(readme);
+  assert.ok(section, `README must have a ## ${heading} section`);
 
-  // Only the "## Skills" section. Other tables document different things —
-  // the reserved names a repository supplies are not skills in this plugin.
-  const section = /^## Skills$([\s\S]*?)(?=^## |\Z)/m.exec(readme);
-  assert.ok(section, "README must have a ## Skills section");
-
-  const documented = new Set(
-    [...section[1].matchAll(/^\|\s*`([a-z][a-z0-9-]*)`\s*\|/gm)].map(([, n]) => n),
+  return new Map(
+    [...section[1].matchAll(/^\|\s*`([a-z][a-z0-9-]*)`(\s*\*auto\*)?\s*\|/gm)].map(([, n, auto]) => [n, Boolean(auto)]),
   );
-  const actual = new Set(loadSkills().map((s) => s.name));
+}
 
-  const stale = [...documented].filter((n) => !actual.has(n)).map((n) => `README documents "${n}", which no longer exists`);
-  const missing = [...actual].filter((n) => !documented.has(n)).map((n) => `"${n}" exists but is not in the README`);
+function assertSameNames(documented, actual, kind) {
+  const stale = [...documented].filter((n) => !actual.has(n)).map((n) => `README documents ${kind} "${n}", which no longer exists`);
+  const missing = [...actual].filter((n) => !documented.has(n)).map((n) => `${kind} "${n}" exists but is not in the README`);
+  assert.deepEqual([...stale, ...missing].sort(), [], `the README must match the ${kind}s that exist`);
+}
 
-  assert.deepEqual([...stale, ...missing].sort(), [], "the README must match the skills that exist");
+test("every skill the README names exists, and every skill is in the README", () => {
+  assertSameNames(new Set(readmeRows("Skills").keys()), new Set(loadSkills().map((s) => s.name)), "skill");
+});
+
+test("every agent the README names exists, and every agent is in the README", () => {
+  assertSameNames(new Set(readmeRows("Agents").keys()), new Set(loadAgents().map((a) => a.name)), "agent");
+});
+
+test("the README marks exactly the auto-invocable skills as *auto*", () => {
+  const rows = readmeRows("Skills");
+  const wrong = loadSkills()
+    .filter((s) => rows.has(s.name))
+    .filter((s) => rows.get(s.name) !== (s.frontmatter["disable-model-invocation"] === "false"))
+    .map((s) => `${s.name} is ${rows.get(s.name) ? "" : "not "}marked *auto*, but disable-model-invocation is ${s.frontmatter["disable-model-invocation"]}`);
+
+  assert.deepEqual(wrong, [], "the *auto* marker must match how each skill is classified");
 });
 
 test("every markdown link in a skill resolves", () => {

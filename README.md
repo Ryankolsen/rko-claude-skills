@@ -1,56 +1,67 @@
 # rko-claude-skills
 
-A curated library of Claude Code skills for software development workflows.
+A Claude Code plugin of skills and agents for software development: planning,
+building, debugging, reviewing, and committing.
 
-The core skills are **stack-agnostic**. Nothing names a package manager or a
-build command; skills that need to run something delegate to a reserved skill
-name the consuming repository supplies. Stack-specific skills (currently
-Drupal) ship alongside them; the generic skills reach them only through
-`detect-stack`, which decides from evidence in the repository. See
-[CONVENTIONS.md](plugins/rko-claude-skills/CONVENTIONS.md).
+It is **stack-agnostic**. No skill names a build or test command; anything that
+needs to run one invokes a skill your repository supplies. Stack-specific rules
+(currently Drupal) load only when `detect-stack` finds evidence of that stack.
+The contract is in [CONVENTIONS.md](plugins/rko-claude-skills/CONVENTIONS.md).
 
-## Installation
+## Install
 
 ```
-/marketplace add github:Ryankolsen/rko-claude-skills
+/plugin marketplace add Ryankolsen/rko-claude-skills
 /plugin install rko-claude-skills@rko-claude-skills
 ```
 
-## What your repository supplies
+## Usage
 
-| Reserved name | Purpose |
-|-------|-------------|
-| `run-tests` | Tests only — fast enough to call on every red-green cycle |
-| `verify` | The full pre-commit gate: typecheck, lint, tests, build |
+1. **Bootstrap each repository once** with `/rko-claude-skills:setup-project-skills`.
+   It detects how the project runs its checks and writes two skills under
+   `.claude/skills/`:
 
-A skill that cannot find one works down a fixed fallback chain — repository
-documentation, then auto-detection, then asking — and never guesses a command.
+   | Reserved name | Purpose |
+   |-------|-------------|
+   | `run-tests` | Tests only. Fast enough to run on every red-green cycle |
+   | `verify` | The full pre-commit gate: typecheck, lint, tests, build |
+
+   Without them, skills fall back to the repository's docs, then to
+   auto-detection, then to asking you. They never guess a command.
+
+2. **Start workflows by name.** A typical feature goes
+   `write-a-prd` → `prd-to-plan` or `prd-to-issues` → `do-work` (in this
+   thread) or `delegate-work` (subagents in parallel worktrees, then a QA
+   review). Type them as `/rko-claude-skills:<name>`.
+
+3. **Let the rest happen on their own.** Skills marked *auto* below load when
+   the situation fits, such as a bug report, a merge conflict, or a commit to
+   write. Agents are spawned by skills like `delegate-work`, or by asking for
+   one ("run the qa-verifier").
 
 ## Agents
+
+Each agent file holds only an identity, a tool allowlist, and the skills it
+delegates to. The procedure lives in those skills.
 
 | Agent | Description |
 |-------|-------------|
 | `agent-architect` | Design a new agent: inventory existing skills, research prior art, return a build spec |
 | `skill-author` | Draft a SKILL.md from an approved spec, self-checked against the write-a-skill rubric |
-| `qa-verifier` | Run the project's verification gate and review the change for bugs, side effects, and unmet criteria, reporting a triaged verdict without fixing anything |
-| `standards-reviewer` | Review a diff against the codebase — documented conventions, and existing code it should have reused — reporting findings without fixing them |
-| `clean-code-reviewer` | Review a diff's new code for duplication, functions worth extracting, and Fowler code smells, reporting findings without fixing them |
-| `developer` | Build one specified phase of a plan in an isolated context, report status, and leave the verdict to qa-verifier |
-| `codebase-explorer` | Explore a codebase and return a structured map: entry points, modules, seams, and the next skill to reach for |
+| `codebase-explorer` | Map a codebase (entry points, modules, seams) and name the next skill to reach for |
+| `developer` | Build one specified phase of a plan in an isolated context, or fix the findings in a QA report |
+| `qa-verifier` | Run the verification gate and review the change for bugs and unmet criteria. Returns green, red, or blocked |
+| `standards-reviewer` | Check a diff against the repo's conventions and the existing code it should have reused |
+| `clean-code-reviewer` | Check a diff's new code for duplication, extractable logic, and Fowler code smells |
 
-Agent files are deliberately thin — identity, a tool allowlist, and what they
-delegate to. Procedure lives in skills, so the same procedure runs whether it is
-invoked in a subagent or the main thread.
+The three reviewers report without fixing anything, and only `qa-verifier` can
+block.
 
 ## Skills
 
-Each skill declares a `domain` — the job it claims — and whether it is
-**auto-invocable** (Claude may reach for it from context) or a **workflow**
-skill (you invoke it by name). Only one skill may claim a domain in the
-auto-invocable pool, because an agent picks from descriptions alone and two
-skills claiming one job make that pick a coin toss.
+*auto*: Claude may invoke it from context. All others run only when invoked by name.
 
-### Planning and specification
+### Planning
 
 | Skill | Description |
 |-------|-------------|
@@ -66,54 +77,43 @@ skills claiming one job make that pick a coin toss.
 | Skill | Description |
 |-------|-------------|
 | `do-work` | Execute a unit of work end-to-end: plan, implement, validate, commit |
-| `delegate-work` | Run the agents against one issue or a queue: developers build in parallel worktrees, merge into the current branch, then a three-agent QA review judges once — bugs get one fix pass before leftovers become tickets, style findings become a cleanup ticket |
-| `tdd` | Test-driven development: what a good test is, seams, and the red-green loop |
+| `delegate-work` | Work one issue or a queue through the agents: parallel developers, one QA review, one fix pass, and tickets for leftovers |
+| `tdd` *auto* | Test-driven development: what a good test is, seams, and the red-green loop |
 | `prototype` | Build a throwaway prototype to answer a design question |
+| `debug` *auto* | Feedback-loop diagnosis: reproduce, minimise, hypothesise, instrument, fix |
 
-### Diagnosis
-
-| Skill | Description |
-|-------|-------------|
-| `debug` | Feedback-loop diagnosis: reproduce, minimise, hypothesise, instrument, fix |
-
-### Design and architecture
+### Design
 
 | Skill | Description |
 |-------|-------------|
-| `codebase-design` | Shared vocabulary for designing deep modules, interfaces, and seams |
+| `codebase-design` *auto* | Shared vocabulary for deep modules, interfaces, and seams |
 | `improve-codebase-architecture` | Find opportunities to deepen shallow modules |
-| `domain-modeling` | Build and sharpen a project's domain model, CONTEXT.md, and ADRs |
+| `domain-modeling` *auto* | Build and sharpen a project's domain model, CONTEXT.md, and ADRs |
 
-### Review and version control
+### Review and git
 
 | Skill | Description |
 |-------|-------------|
 | `code-review` | Review a diff on two axes: repo standards, and fidelity to the spec |
-| `commit-safety` | The checklist for whether a diff is safe to land: criteria, secrets, side effects |
-| `commit-message` | Group pending changes into logical commits and write each message |
-| `resolving-merge-conflicts` | Resolve an in-progress merge or rebase conflict |
+| `commit-safety` *auto* | The checklist for whether a diff is safe to land: criteria, secrets, side effects |
+| `commit-message` *auto* | Group pending changes into logical commits and write each message |
+| `resolving-merge-conflicts` *auto* | Resolve an in-progress merge or rebase conflict |
 | `git-guardrails-claude-code` | Hooks that block dangerous git commands before they execute |
 
-### Drupal
-
-Applied automatically when `detect-stack` finds a Drupal site — `composer.json`
-requiring `drupal/core`, a `core/lib/Drupal.php`, or a module's `.info.yml`. No
-generic skill names it; the validator checks that. Its procedures for fields,
-Views, Twig, and contrib patches are reference files, loaded only when a task
-needs one.
+### Stack
 
 | Skill | Description |
 |-------|-------------|
-| `drupal-conventions` | Drupal rules and procedures: fields and Views via config YAML, Twig and preprocess, Composer patches, cache metadata, and slicing Drupal work |
+| `detect-stack` *auto* | Detect the repository's stack from evidence and name the stack skills that apply |
+| `drupal-conventions` *auto* | Drupal fields and Views via config YAML, Twig and preprocess, Composer patches, cache metadata |
 
 ### Meta
 
 | Skill | Description |
 |-------|-------------|
-| `write-a-skill` | Create new skills with proper structure and progressive disclosure |
-| `trim-a-skill` | Shrink a bloated SKILL.md without losing facts: move detail to reference files, cut what the agent already knows, prove it lossless |
-| `detect-stack` | Detect the repository's stack from evidence and name the stack skills that apply |
-| `setup-project-skills` | Detect how a repo runs its checks and generate its `run-tests` and `verify` skills |
+| `setup-project-skills` | Generate a repo's `run-tests` and `verify` skills, and offer a pre-commit hook for the same gate |
+| `write-a-skill` | Create a new skill with proper structure and progressive disclosure |
+| `trim-a-skill` | Shrink a bloated SKILL.md without losing facts |
 | `teach` | Teach a new skill or concept within this workspace |
 | `handoff` | Compact the conversation into a handoff document for another agent |
 
@@ -123,10 +123,13 @@ needs one.
 npm test
 ```
 
-The suite is a validator over the plugin tree — it checks frontmatter, that
-referenced commands and links resolve, that no generic skill names a package
-manager, and that this README matches the skills that actually exist. Node 18+,
-no dependencies.
+A dependency-free validator (Node 18+) over the plugin tree. It enforces the
+rules in CONVENTIONS.md, checks agents, links, and delegations, tests the
+`detect-stack` and `setup-project-skills` scripts against fixtures, and
+keeps this README in sync with the skills and agents that exist. Any change
+under `plugins/` must bump the version in
+`plugins/rko-claude-skills/.claude-plugin/plugin.json`, or installed copies
+never update.
 
 ## License
 
