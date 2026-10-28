@@ -8,7 +8,7 @@ The web rules for the `accessibility` skill. Cite the success criterion (SC) on 
 - **Images.** Informative images have alt text that says what the image is for; decorative ones have `alt=""` (1.1.1). Icon-only controls get a name from text, `aria-label` or visually hidden text (4.1.2).
 - **ARIA.**
   - First rule: use a native element when one exists.
-  - No redundant role on a native element (`<button role="button">`).
+  - No redundant role on a native element (`<button role="button">`), and no demand for `aria-*` on a native element that is already correctly labelled. Redundant ARIA is worse than none.
   - Never `aria-hidden="true"` on focusable content, or on an ancestor of it (4.1.2).
   - A role requires its states and properties (`checkbox` needs `aria-checked`, `combobox` needs `aria-expanded`).
   - `aria-labelledby` and `aria-describedby` must point at ids that exist.

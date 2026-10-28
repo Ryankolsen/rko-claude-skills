@@ -18,7 +18,7 @@ The caller gives you a range, `<base>..HEAD`. Confirm it resolves (`git rev-pars
 
 ## 2. Is there UI to review?
 
-Decide from what the diff does, **not from file extensions alone**. UI lives in templates, components, stylesheets, layout and resource files, scene files (a Godot project's UI is in `.tscn` and ordinary `.gd` scripts), and in code that builds widgets, text, or colour at runtime. Invoke the `detect-stack` skill, and every stack skill it names, to learn where this repository keeps its UI.
+Decide from what the diff does, **not from file extensions alone**. UI lives in templates, components, stylesheets, layout and resource files, scene files (a Godot project's UI is in `.tscn` and ordinary `.gd` scripts), and in code that builds widgets, text, or colour at runtime. Invoke the `detect-stack` skill and every stack skill it names; a stack skill says where UI lives on its platform. If it names none, decide from the diff alone, using the cues above.
 
 If the diff touches no UI surface, your **first line is `no UI in this diff`**, followed by one line saying what the diff did touch, and you stop. That is a stated skip, not a pass.
 
@@ -26,7 +26,7 @@ If the diff touches no UI surface, your **first line is `no UI in this diff`**, 
 
 Invoke the `accessibility` skill for the checklist. It supplies the bar — apply it to the added and changed UI rather than reciting criteria from memory. Where a stack skill states an accessibility rule for its platform, that is a documented standard; cite it.
 
-Then, if the repository supplies it, invoke the project's `run-a11y-checks` skill and run what it specifies. It is optional and holds the slow or environment-dependent checks, such as an audit in a real browser. If it is absent, review statically and say that no tooling ran. **Never ask, guess, install, or invent a command.** Accessibility tests inside the normal suite are `qa-verifier`'s, through `verify`.
+Then, if the repository supplies it, invoke the project's `run-a11y-checks` skill and run what it specifies. It is optional and holds the slow or environment-dependent checks, such as an audit in a real browser. If it is absent, review statically and say that no tooling ran. **Never ask, guess, install, or invent a command.** If you saw an accessibility script the repository already defines — in its manifest or task file — you may name it as not run, so the caller knows it exists. Accessibility tests inside the normal suite are `qa-verifier`'s, through `verify`.
 
 Skip anything tooling already enforces. Judge only what the diff lets you establish; what needs a running UI, real assistive technology, or rendered colour is not verifiable here, so say so rather than guess.
 
@@ -35,9 +35,11 @@ Skip anything tooling already enforces. Judge only what the diff lets you establ
 Under 400 words, worst first, no preamble. **Every finding needs evidence**, or it is dropped:
 
 - **Where** — `path:line` in the diff, with the hunk it turns on quoted in a line or two.
-- **Criterion** — the WCAG success criterion on web (for example `1.4.3 Contrast (Minimum)`), the principle's name elsewhere.
+- **Criterion** — the WCAG success criterion on web (for example `1.4.3 Contrast (Minimum)`), the principle's name from the `accessibility` skill elsewhere.
 - **Fix direction** — one line. Direction, not code.
 - **Confidence** — `high` or `medium`. Leave out anything you would call low.
+
+Problems that exist only in untouched code go under a separate **Pre-existing** heading, never among the findings.
 
 State what tooling ran, or that none did. End with what was not verifiable from the diff, and what you did not cover: files skipped, platforms or states not reachable statically, and whether you reviewed a range or the working tree.
 

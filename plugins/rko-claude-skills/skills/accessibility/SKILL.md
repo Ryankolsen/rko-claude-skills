@@ -11,7 +11,7 @@ What to look for in a UI change. A caller applies these and decides what to do; 
 
 **Review the change, not the repository.** A problem in untouched code is not this change's finding. Say it exists if you trip over it, and label it pre-existing.
 
-Establish what changed first: `git status`, `git diff HEAD` for uncommitted work, `git diff <base>...HEAD` when a base was named. Read added lines closely (`git diff -U0`).
+Establish what changed first: `git status`, `git diff HEAD` for uncommitted work, `git diff <base>..HEAD` when a base was named. Read added lines closely (`git diff -U0`).
 
 ## Find the UI surface
 
@@ -23,18 +23,18 @@ Invoke the `detect-stack` skill and apply any stack skill it names; those supply
 
 ## Principles — every platform
 
-For each, look at what the diff adds or changes:
+For each, look at what the diff adds or changes. Outside the web, cite a finding by the principle's name in bold.
 
-- **Every interactive control has a name** assistive tech can announce. Icon-only buttons, image buttons, custom widgets and unlabelled inputs are the usual misses.
-- **Colour is never the only signal.** A state, error, required field or chart series distinguished only by hue needs a second cue: text, icon, shape, pattern.
-- **Text is readable** at the target resolution and scale, and respects the user's text-size setting where the platform has one. Look for fixed sizes, clipped or truncated text, tiny fonts.
-- **Targets are large enough.** WCAG 2.5.8 sets 24x24 CSS px minimum on web; about 44pt is the common mobile guidance. Check sizes and spacing the diff sets.
-- **Motion and flashing can be reduced or avoided.** Added animation, parallax, autoplay or screen shake needs an off switch or the platform's reduced-motion preference; nothing flashes more than three times a second.
-- **More than one input reaches every action.** Keyboard, gamepad or switch, not only pointer or gesture. A drag needs a non-drag alternative.
-- **Focus is visible, never trapped, and moves sensibly** when a screen, dialog or menu opens or closes: into it on open, back to the trigger on close.
-- **Reading and navigation order matches visual order.** Look for reordering done in style or layout only.
-- **Errors and state changes are announced**, not only shown: a toast, a validation message, a loading state.
-- **Time limits can be extended** or turned off.
+- **Named controls.** Every interactive control has a name assistive tech can announce. Icon-only buttons, image buttons, custom widgets and unlabelled inputs are the usual misses.
+- **Colour not the sole signal.** A state, error, required field or chart series distinguished only by hue needs a second cue: text, icon, shape, pattern.
+- **Readable text.** Text is readable at the target resolution and scale, and respects the user's text-size setting where the platform has one. Look for fixed sizes, clipped or truncated text, tiny fonts.
+- **Target size.** Targets are large enough. WCAG 2.5.8 sets 24x24 CSS px minimum on web; about 44pt is the common mobile guidance. Check sizes and spacing the diff sets.
+- **Reduced motion.** Motion and flashing can be reduced or avoided. Added animation, parallax, autoplay or screen shake needs an off switch or the platform's reduced-motion preference; nothing flashes more than three times a second.
+- **Input alternatives.** More than one input reaches every action: keyboard, gamepad or switch, not only pointer or gesture. A drag needs a non-drag alternative.
+- **Focus management.** Focus is visible, never trapped, and moves sensibly when a screen, dialog or menu opens or closes: into it on open, back to the trigger on close.
+- **Reading order.** Reading and navigation order matches visual order. Look for reordering done in style or layout only.
+- **Announced state.** Errors and state changes are announced, not only shown: a toast, a validation message, a loading state. If you cannot establish that the platform, or this version of its engine or toolkit, offers a way to announce, list it under not verifiable rather than as a finding.
+- **Time limits.** A time limit can be extended or turned off.
 
 ## False positives
 
