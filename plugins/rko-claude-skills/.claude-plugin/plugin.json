@@ -1,7 +1,7 @@
 {
   "name": "rko-claude-skills",
   "description": "Stack-agnostic skills and agents for planning, building, debugging, reviewing, and committing. Skills delegate to reserved skill names your repository supplies, so they work on any stack.",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": {
     "name": "Ryan Kolsen",
     "email": "ryankolsen@gmail.com"
