@@ -55,12 +55,25 @@ function detectDrupal(dir) {
 }
 
 /**
+ * The engine version matters for rules that depend on it (screen-reader
+ * support arrived in 4.5), so report the one project.godot declares rather
+ * than leaving the reader to assume the newest.
+ */
+function detectGodot(dir) {
+  const project = read(dir, "project.godot");
+  if (project === null) return null;
+  const version = project.match(/^config\/features=PackedStringArray\("(\d+\.\d+)"/m)?.[1];
+  return version ? `project.godot (engine ${version})` : "project.godot (engine version not declared)";
+}
+
+/**
  * Each entry names the stack, the skill that carries its rules, and how to
  * recognise it. Adding a stack means adding an entry here and a skill whose
  * frontmatter declares that stack; the test suite checks the two agree.
  */
 export const STACKS = [
   { stack: "drupal", skill: "drupal-conventions", detect: detectDrupal },
+  { stack: "godot", skill: "godot-conventions", detect: detectGodot },
 ];
 
 export function detect(dir) {

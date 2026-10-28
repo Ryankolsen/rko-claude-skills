@@ -46,6 +46,20 @@ test("Lando is reported as the prefix, and no wrapper as null", () => {
   assert.equal(detect(fixture(drupal)).envPrefix, null);
 });
 
+test("a Godot project is recognised from project.godot, with its engine version", () => {
+  const result = detect(fixture({
+    "project.godot": 'config_version=5\n\n[application]\n\nconfig/name="game"\nconfig/features=PackedStringArray("4.7", "Mobile")\n',
+  }));
+
+  assert.deepEqual(result.stacks.map((s) => s.skill), ["godot-conventions"]);
+  assert.equal(result.stacks[0].evidence, "project.godot (engine 4.7)");
+});
+
+test("a Godot project that declares no engine version says so rather than assuming one", () => {
+  const [godot] = detect(fixture({ "project.godot": "config_version=5\n" })).stacks;
+  assert.equal(godot.evidence, "project.godot (engine version not declared)");
+});
+
 test("a PHP project that is not Drupal matches no stack", () => {
   // composer.json alone is not evidence of Drupal — Laravel and Symfony have one too.
   assert.deepEqual(stacksOf({ "composer.json": JSON.stringify({ require: { "laravel/framework": "^11" } }) }), []);
