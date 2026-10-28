@@ -17,4 +17,6 @@ The web rules for the `accessibility` skill. Cite the success criterion (SC) on 
 - **Motion.** Animation and transition added in CSS or JS respects `prefers-reduced-motion`; autoplay, scrolling or blinking content over five seconds can be paused (2.2.2). Reduced motion itself is 2.3.3, which is AAA — report it at medium confidence.
 - **Contrast.** 4.5:1 for text, 3:1 for large text (1.4.3) and for UI components and meaningful graphics (1.4.11). Only a finding when both colours resolve.
 - **Reflow and size.** Fixed pixel widths or `user-scalable=no` that block zoom (1.4.4, 1.4.10). Target size 24x24 CSS px minimum (2.5.8).
+- **Client-side routing.** A route change that does not reload the page leaves focus where it was and announces nothing. After navigation, move focus to the new view's heading or main region and update `document.title`, or announce the change in a live region (2.4.3, 4.1.3). A router change that adds routes without this is a finding; a skip link is not a substitute.
+- **JSX.** The same rules hold under their JSX spellings — `htmlFor`, `className`, and `aria-*` kept hyphenated. `onClick` on a `div` is still a clickable `div`.
 - **Language and title.** A page declares `lang` (3.1.1) and has a descriptive `title` (2.4.2).
