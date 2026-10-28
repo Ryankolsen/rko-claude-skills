@@ -70,7 +70,7 @@ block.
 | `to-spec` | Turn the current conversation into a spec, with no interview |
 | `prd-to-plan` | Break a PRD into phased tracer-bullet slices as a GitHub issue |
 | `prd-to-issues` | Break a PRD into independently-grabbable GitHub issues |
-| `grill-me` | Interview relentlessly about a plan until reaching shared understanding |
+| `grill-me` | Interview about a plan in rounds until reaching shared understanding, recording new terms and ADRs as they settle |
 | `research` | Investigate a question against primary sources and write up the findings |
 
 ### Building
@@ -89,7 +89,7 @@ block.
 |-------|-------------|
 | `codebase-design` *auto* | Shared vocabulary for deep modules, interfaces, and seams |
 | `improve-codebase-architecture` | Find opportunities to deepen shallow modules |
-| `domain-modeling` *auto* | Build and sharpen a project's domain model, CONTEXT.md, and ADRs |
+| `domain-modeling` *auto* | Build and sharpen a project's domain model: CONTEXT.md, the glossary, and ADRs |
 
 ### Review and git
 

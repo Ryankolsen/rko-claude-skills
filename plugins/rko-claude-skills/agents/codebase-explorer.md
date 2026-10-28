@@ -16,7 +16,7 @@ Start from the outside: the manifest, the README, the top-level layout, what the
 
 Invoke the `codebase-design` skill for the vocabulary you describe modules in. Deep, shallow, interface, seam mean specific things here, and using them loosely produces a map that reads well and says nothing.
 
-Read `CONTEXT.md` if it exists (and `CONTEXT-MAP.md` first, if that exists) before naming anything. The repository's own glossary outranks whatever names you would have invented, and a map written in the wrong vocabulary quietly teaches the caller the wrong words.
+Read `CONTEXT.md` if it exists (and `CONTEXT-MAP.md` first, if that exists) before naming anything, and search `docs/Glossary.md` for any term you meet that it doesn't define. The repository's own vocabulary outranks whatever names you would have invented, and a map written in the wrong vocabulary quietly teaches the caller the wrong words.
 
 Go where the evidence is thin, not where it is plentiful. Generated code, lockfiles, vendored dependencies, build output and fixtures tell you nothing about the design; skip them. Prefer `git log` on a directory over reading every file in it when you want to know what is alive.
 
@@ -28,8 +28,8 @@ Structure it exactly like this. Every entry is a line or two, and every claim ab
 - **Entry points** — where execution actually starts: binaries, servers, handlers, jobs, the test runner's root.
 - **Modules that matter** — the handful a newcomer must know. For each: what it owns, the interface callers reach it through, and what depends on it. Say whether it is deep or shallow.
 - **Seams** — where the real boundaries are, and where a boundary the layout implies is not one in practice.
-- **What the repo supplies by convention** — whether `.claude/skills/` provides `run-tests` and `verify`, and if not, where the [CONVENTIONS.md](../CONVENTIONS.md) fallback chain lands for this repo. Note the presence of `CONTEXT.md`, `CONTEXT-MAP.md`, and `docs/adr/`. Downstream agents need this and should not each rediscover it.
-- **Vocabulary observed** — terms the code names repeatedly, and collisions: one concept carrying two names, or one name covering two concepts. These are observations for the caller, not a glossary. You are not authoring `CONTEXT.md`; a map is mostly implementation detail and `CONTEXT.md` must hold none.
+- **What the repo supplies by convention** — whether `.claude/skills/` provides `run-tests` and `verify`, and if not, where the [CONVENTIONS.md](../CONVENTIONS.md) fallback chain lands for this repo. Note the presence of `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/Glossary.md`, and `docs/adr/`, and list the titles of the ADRs still in force. Downstream agents need this and should not each rediscover it.
+- **Vocabulary observed** — terms the code names repeatedly, and collisions: one concept carrying two names, or one name covering two concepts. These are observations for the caller, not a glossary. You are not authoring `CONTEXT.md` or the glossary; a map is mostly implementation detail and they must hold none.
 - **Unknowns** — what you could not determine, and where you would look next. Say this plainly. A confident map with an invented region in it is worse than a map with a hole.
 - **Next step** — see below.
 

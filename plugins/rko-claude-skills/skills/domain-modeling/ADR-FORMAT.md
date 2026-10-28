@@ -7,24 +7,43 @@ Create the `docs/adr/` directory lazily: only when the first ADR is needed.
 ## Template
 
 ```md
+---
+status: accepted
+---
+
 # {Short title of the decision}
 
 {1-3 sentences: what's the context, what did we decide, and why.}
 ```
 
-That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why*, not in filling out sections.
+That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why*, not in filling out sections. One decision per file; keep the body to a few sentences.
+
+**`status` is required**: `accepted`, or `superseded by ADR-NNNN` once a later ADR replaces it. It is what lets a reader skip decisions no longer in force.
 
 ## Optional sections
 
 Only include these when they add genuine value. Most ADRs won't need them.
 
-- **Status** frontmatter (`proposed | accepted | deprecated | superseded by ADR-NNNN`): useful when decisions are revisited
 - **Considered Options**: only when the rejected alternatives are worth remembering
 - **Consequences**: only when non-obvious downstream effects need to be called out
 
 ## Numbering
 
 Scan `docs/adr/` for the highest existing number and increment by one.
+
+## Superseding
+
+A decision that changes an earlier one supersedes it; never add a second ADR that contradicts the first, and never rewrite an accepted ADR's body. Write the new ADR, then change the old one's status to `superseded by ADR-NNNN`. The history stays readable, and readers see only the decision in force.
+
+## Reading ADRs
+
+List only the decisions in force, titles first:
+
+```sh
+grep -L '^status: superseded' docs/adr/*.md | xargs grep -H -m1 '^# '
+```
+
+Read a full ADR only when its title touches the work. Cite one by number and the rule it sets: `ADR-0003: an optional reserved name may be absent`.
 
 ## When to offer an ADR
 
@@ -34,7 +53,7 @@ All three of these must be true:
 2. **Surprising without context**: a future reader will look at the code and wonder "why on earth did they do it this way?"
 3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
 
-If a decision is easy to reverse, skip it: you'll just reverse it. If it's not surprising, nobody will wonder why. If there was no real alternative, there's nothing to record beyond "we did the obvious thing."
+If a decision is easy to reverse, skip it: you'll just reverse it. When there's a PRD, it belongs in the PRD's Implementation Decisions instead. If it's not surprising, nobody will wonder why. If there was no real alternative, there's nothing to record beyond "we did the obvious thing."
 
 ### What qualifies
 

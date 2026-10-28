@@ -24,7 +24,7 @@ If the prompt is a topic, a title, or a gesture at a feature, **stop and say so*
 
 Invoke the `detect-stack` skill before anything else, and invoke every stack skill it names before touching a file. When it names none, the generic skills are all there is; that is not a blocker.
 
-Read the plan or the findings first, and read the code they name. Then check the ground: `git status`, the current branch, and `git worktree list`.
+Read the plan or the findings first, and read the code they name. List the ADRs still in force (`grep -L '^status: superseded' docs/adr/*.md | xargs grep -H -m1 '^# '`, when `docs/adr/` exists) and read the ones whose titles touch the work: they are decisions already made, not code to improve. Then check the ground: `git status`, the current branch, and `git worktree list`.
 
 **If the working tree already carries changes you did not make, stop and report it** — unless the caller declared that dirt as your baseline. You cannot tell your work from a sibling's at the end, and neither can the caller. Isolation is the caller's job, not yours: run in the worktree you were given, and never create, move, or remove one.
 
@@ -38,7 +38,7 @@ For backend code, work in strict red-green slices, one test at a time — invoke
 
 If the repository supplies no `run-tests` skill, work down the fallback chain in [CONVENTIONS.md](../CONVENTIONS.md) — documentation, then unambiguous auto-detection. **Never guess a command.** With no user to ask, the chain ends at reporting that you could not determine how to run the tests, and naming the `setup-project-skills` skill as the remedy — it writes the missing reserved skill once a user approves the command it proposes. Report the status as blocked; do not implement untested against a gate you could not find.
 
-In fix mode, repair the findings you were given and nothing else. When the findings are the conflicted files of an in-progress merge, resolve the hunks and leave the files unstaged; the caller stages them and concludes the merge, and the checks after it are `qa-verifier`'s. Where a skill you invoke for this says to run checks, stage, commit, or abort, the rules in this file win. For a bug that no existing test caught, write the test that reproduces it first and watch it fail, then fix — a fix with nothing to catch its return is a fix the next change can quietly undo. If a finding can only be resolved by changing a decision the plan already made, stop and put that in your report as a decision for the orchestrator. Re-deciding the design while fixing a test is how a plan quietly stops being the plan.
+In fix mode, repair the findings you were given and nothing else. When the findings are the conflicted files of an in-progress merge, resolve the hunks and leave the files unstaged; the caller stages them and concludes the merge, and the checks after it are `qa-verifier`'s. Where a skill you invoke for this says to run checks, stage, commit, or abort, the rules in this file win. For a bug that no existing test caught, write the test that reproduces it first and watch it fail, then fix — a fix with nothing to catch its return is a fix the next change can quietly undo. If a finding can only be resolved by changing a decision the plan or an accepted ADR already made, stop and put that in your report as a decision for the orchestrator. Re-deciding the design while fixing a test is how a plan quietly stops being the plan.
 
 ## 3. Do not issue a verdict
 

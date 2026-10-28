@@ -25,7 +25,7 @@ With no fixed point, review the uncommitted working tree (`git diff HEAD`) and s
 
 In this order of authority:
 
-1. **What the repository documents** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, a `docs/` entry, and `CONTEXT.md` for the domain vocabulary names must match. Invoke the `detect-stack` skill too, and every stack skill it names: their rules are documented standards. Cite the file or skill and the rule.
+1. **What the repository documents** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, a `docs/` entry, the ADRs still in force in `docs/adr/` (scan their titles, read those the diff touches, cite a reversal as `ADR-NNNN`), and `CONTEXT.md` for the domain vocabulary names must match — search `docs/Glossary.md` for any other domain term the diff names. Invoke the `detect-stack` skill too, and every stack skill it names: their rules are documented standards. Cite the file or skill and the rule.
 2. **What the repository does consistently** — how it already handles errors, logging, configuration, test layout and factories, module boundaries. Find two or three existing examples before calling something a convention; one example is a coincidence.
 
 Skip anything tooling already enforces. A linter or formatter finding restated by hand is noise.
@@ -40,7 +40,7 @@ Under 400 words, worst first. **Every finding needs evidence**, or it is dropped
 
 - **Where** — `path:line` in the diff, with the hunk it turns on quoted in a line or two.
 - **Against what** — the documented rule (file + rule), the existing examples of the convention (`path:line` each), or the existing function it duplicates (`path:line`).
-- **Fix direction** — one line: "call `formatDate` from `src/lib/dates.ts:12`", "rename to match `CONTEXT.md`'s term". Direction, not code.
+- **Fix direction** — one line: "call `formatDate` from `src/lib/dates.ts:12`", "rename to match the glossary's term". Direction, not code.
 - **Confidence** — `high` or `medium`. Leave out anything you would call low; a reviewer who reports guesses trains the reader to skip the report.
 
 Label documented-standard violations as such; everything else is a judgement call, and say so.

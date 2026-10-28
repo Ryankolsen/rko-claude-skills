@@ -53,6 +53,6 @@ For each, say what the change does beyond what was asked, and whether it looks d
 
 ## Consistency with the codebase — advisory
 
-Judge the change against how this repository already does things: its established patterns for this kind of code, its error-handling and logging conventions, its naming and domain vocabulary (`CONTEXT.md` where one exists), its test layout and existing factories. Duplicating a helper that already exists, or inventing a second way to do something the codebase settled long ago, is the finding worth reporting here.
+Judge the change against how this repository already does things: its established patterns for this kind of code, its error-handling and logging conventions, its naming and domain vocabulary (`CONTEXT.md` where one exists, and `docs/Glossary.md` searched for the terms the diff names), its test layout and existing factories. Duplicating a helper that already exists, or inventing a second way to do something the codebase settled long ago, is the finding worth reporting here.
 
 **These are judgement calls and they never block.** Report them under a heading that says so. Depth on this axis belongs to the `code-review` skill, which reads the repository's documented standards and the Fowler smell baseline properly; this is what is obvious from the diff, not that review. Where a finding needs that treatment, name it instead of straining to do its job.
