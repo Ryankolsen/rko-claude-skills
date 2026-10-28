@@ -4,7 +4,7 @@ status: accepted
 
 # The plugin owns every generic skill; repositories keep only what is theirs
 
-Every skill that is not specific to one repository lives in this plugin. A repository's `.claude/skills/` holds only the reserved names it must supply (`run-tests`, `verify`, optionally `run-a11y-checks`) and procedures that exist only there — deploy scripts, its database workflow, its theme system. Per-repository copies of generic skills (`write-a-prd`, `do-work`, `grill-me`…) and user-level skills that name one project are removed or moved into that project.
+Every skill that is not specific to one repository lives in this plugin. A repository's `.claude/skills/` holds only the reserved names it must supply (`run-tests`, `verify`, optionally `run-a11y-checks`) and procedures that exist only there — deploy scripts, its database workflow, its theme system. Per-repository copies of generic skills (`write-a-prd`, `do-work`, `interview-me`…) and user-level skills that name one project are removed or moved into that project.
 
 ## Consequences
 
