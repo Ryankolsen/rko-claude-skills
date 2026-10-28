@@ -26,6 +26,12 @@ The full pre-commit gate: typecheck, lint, tests, build — whatever this reposi
 
 A repository that has only tests may implement `verify` as running the tests. What it must not do is claim a check it does not perform.
 
+### `run-a11y-checks`
+
+Runs the accessibility checks that are too slow or too environment-dependent for `run-tests` — a real-browser audit, a device run. Accessibility tests that already live in the normal suite stay there and run through `run-tests` and `verify`.
+
+**Optional.** Many repositories have no accessibility tooling, and that is a fact to report, not a gap to fill. When this skill is absent, the caller skips the fallback chain below: it reviews statically and says no tooling ran. It never asks, because its caller is usually a subagent with no user to ask.
+
 
 ## Reserved names are always model-invocable
 
