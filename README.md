@@ -115,7 +115,7 @@ block.
 
 | Skill | Description |
 |-------|-------------|
-| `setup-project-skills` | Generate a repo's `run-tests` and `verify` skills, and offer a pre-commit hook for the same gate |
+| `setup-project-skills` | Generate a repo's `run-tests` and `verify` skills, and `run-a11y-checks` when it scripts an accessibility audit; offer a pre-commit hook for the same gate |
 | `write-a-skill` | Create a new skill with proper structure and progressive disclosure |
 | `trim-a-skill` | Shrink a bloated SKILL.md without losing facts |
 | `teach` | Teach a new skill or concept within this workspace |

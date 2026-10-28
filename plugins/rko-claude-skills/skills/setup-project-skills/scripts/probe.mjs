@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Detect how a repository runs its tests and checks, and generate the reserved
-// `run-tests` and `verify` skills for it.
+// `run-tests` and `verify` skills for it — and `run-a11y-checks` when the
+// repository already scripts its accessibility checks.
 //
 //   node probe.mjs <dir>            print the plan as JSON, write nothing
 //   node probe.mjs <dir> --write    write the skills that are missing
@@ -45,6 +46,14 @@ const dirsContaining = (dir, sub, re) => {
   }
 };
 
+const LOCKFILES = { "pnpm-lock.yaml": "pnpm", "yarn.lock": "yarn", "bun.lockb": "bun", "package-lock.json": "npm" };
+
+/** The lockfile names the package manager; npm is a default, not a finding. */
+const packageManager = (dir) => {
+  const lockfile = Object.keys(LOCKFILES).find((f) => existsSync(join(dir, f)));
+  return { lockfile, pm: lockfile ? LOCKFILES[lockfile] : "npm" };
+};
+
 /** The lockfile names the package manager; the manifest names the scripts. */
 function detectNode(dir) {
   const manifest = read(dir, "package.json");
@@ -53,9 +62,7 @@ function detectNode(dir) {
   const { scripts = {} } = JSON.parse(manifest);
   if (!scripts.test) return null;
 
-  const LOCKFILES = { "pnpm-lock.yaml": "pnpm", "yarn.lock": "yarn", "bun.lockb": "bun", "package-lock.json": "npm" };
-  const lockfile = Object.keys(LOCKFILES).find((f) => existsSync(join(dir, f)));
-  const pm = lockfile ? LOCKFILES[lockfile] : "npm";
+  const { lockfile, pm } = packageManager(dir);
 
   const run = (s) => `${pm} run ${s}`;
   const gate = ["typecheck", "lint", "test", "build"].filter((s) => scripts[s]).map(run);
@@ -137,6 +144,51 @@ const DETECTORS = [
   (dir) => (/^test:/m.test(read(dir, "Makefile") ?? "") ? { stack: "make", evidence: "Makefile test target", runTests: "make test", verify: "make test" } : null),
 ];
 
+/**
+ * Accessibility checks are found separately from the test runner: they are an
+ * optional reserved name, and a repository's audit is usually the slow kind —
+ * a real browser, a device — that must stay out of `run-tests`.
+ *
+ * Only a script the repository already defines counts. Tooling installed with
+ * no script to run it is reported, not wired up: composing the invocation
+ * would be inventing a command, and the user is the one who knows it.
+ */
+const A11Y_SCRIPT = /(^|[:_-])(a11y|accessibility)([:_-]|$)/i;
+const A11Y_PACKAGES = ["@axe-core/playwright", "@axe-core/cli", "axe-playwright", "pa11y", "pa11y-ci", "@lhci/cli", "lighthouse"];
+
+function detectA11y(dir) {
+  const target = (read(dir, "Makefile") ?? "").match(/^((?:a11y|accessibility)[\w-]*):/m)?.[1];
+  if (target) return { status: "detected", command: `make ${target}`, evidence: `Makefile ${target} target` };
+
+  let manifest;
+  try {
+    manifest = JSON.parse(read(dir, "package.json") ?? "");
+  } catch {
+    return { status: "none", evidence: "no package.json scripts or Makefile target for accessibility checks" };
+  }
+
+  const { pm } = packageManager(dir);
+  const scripts = Object.keys(manifest.scripts ?? {}).filter((s) => A11Y_SCRIPT.test(s)).sort();
+  if (scripts.length) {
+    return {
+      status: "detected",
+      command: scripts.map((s) => `${pm} run ${s}`).join(" && "),
+      evidence: `package.json script${scripts.length > 1 ? "s" : ""} ${scripts.join(", ")}`,
+    };
+  }
+
+  const deps = { ...manifest.dependencies, ...manifest.devDependencies };
+  const tools = A11Y_PACKAGES.filter((p) => deps[p]);
+  if (tools.length) {
+    return {
+      status: "tooling-without-script",
+      evidence: `package.json has ${tools.join(", ")} but no script runs ${tools.length > 1 ? "them" : "it"}`,
+    };
+  }
+
+  return { status: "none", evidence: "no package.json script, Makefile target, or audit package for accessibility checks" };
+}
+
 const DESCRIPTIONS = {
   "run-tests": {
     domain: "test-execution",
@@ -148,14 +200,25 @@ const DESCRIPTIONS = {
     description:
       "Run this project's full pre-commit gate. Use when the user wants to verify a change is ready to commit, asks whether everything passes, or is about to commit or open a pull request.",
   },
+  "run-a11y-checks": {
+    domain: "accessibility-checks",
+    description:
+      "Run this project's slow or environment-dependent accessibility checks, such as a real-browser audit. Use when reviewing a UI change for accessibility, before a release, or after visual changes.",
+  },
+};
+
+const TITLES = { "run-tests": "Run Tests", verify: "Verify", "run-a11y-checks": "Run Accessibility Checks" };
+
+const PURPOSES = {
+  "run-tests": "Tests only — no lint, no typecheck, no build — so it is safe to call on every red-green cycle.",
+  verify: "The full gate, run once before committing. For the fast tests-only call, invoke the project's `run-tests` skill.",
+  "run-a11y-checks":
+    "The accessibility checks too slow or environment-dependent for `run-tests` — never part of the commit gate. Accessibility tests that already run in the normal suite stay there. If a run fails because the environment is missing something (a browser, a device), say so; that is not a violation.",
 };
 
 function skillFile(name, command, detected) {
   const { domain, description } = DESCRIPTIONS[name];
-  const purpose =
-    name === "run-tests"
-      ? "Tests only — no lint, no typecheck, no build — so it is safe to call on every red-green cycle."
-      : "The full gate, run once before committing. For the fast tests-only call, invoke the project's `run-tests` skill.";
+  const purpose = PURPOSES[name];
 
   return `---
 name: ${name}
@@ -164,7 +227,7 @@ domain: ${domain}
 disable-model-invocation: false
 ---
 
-# ${name === "run-tests" ? "Run Tests" : "Verify"}
+# ${TITLES[name]}
 
 This repository's implementation of the \`${name}\` reserved skill name. ${purpose}
 
@@ -204,7 +267,9 @@ if (!detected) {
   process.exit(0);
 }
 
+const a11y = detectA11y(dir);
 const commands = { "run-tests": detected.runTests, verify: detected.verify };
+if (a11y.status === "detected") commands["run-a11y-checks"] = a11y.command;
 
 // A stack can be identified and still be unrunnable — a detected engine whose
 // binary is nowhere to be found. Writing the command anyway would bake in the
@@ -214,6 +279,7 @@ const plan = {
   status: detected.missing ? "incomplete" : "detected",
   stack: detected.stack,
   evidence: detected.evidence,
+  a11y,
   skills: {},
   written: [],
   skipped: [],
@@ -239,7 +305,8 @@ for (const [name, command] of Object.entries(commands)) {
     continue;
   }
   mkdirSync(join(path, ".."), { recursive: true });
-  writeFileSync(path, skillFile(name, command, detected));
+  const source = name === "run-a11y-checks" ? { evidence: a11y.evidence } : detected;
+  writeFileSync(path, skillFile(name, command, source));
   plan.written.push(name);
 }
 

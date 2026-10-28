@@ -1,6 +1,6 @@
 ---
 name: setup-project-skills
-description: Set up a repository with the reserved skill names that generic skills and agents depend on, by detecting how the project runs its tests and checks, and offer a pre-commit hook wired to the same gate if none exists. Use when adopting this plugin in a new repository, when a skill reports it cannot find run-tests or verify, when `delegate-work` reports no test-running commit hook was found, or when the user asks to bootstrap or configure project skills.
+description: Set up a repository with the reserved skill names that generic skills and agents depend on, by detecting how the project runs its tests, checks, and any accessibility audit, and offer a pre-commit hook wired to the same gate if none exists. Use when adopting this plugin in a new repository, when a skill reports it cannot find run-tests or verify, when `delegate-work` reports no test-running commit hook was found, or when the user asks to bootstrap or configure project skills.
 domain: project-bootstrap
 disable-model-invocation: true
 ---
@@ -12,8 +12,10 @@ reserved name, and the repository supplies it. This bootstraps a repository's
 side of that contract — see
 [CONVENTIONS.md](../../CONVENTIONS.md) for the contract itself.
 
-Result: `.claude/skills/run-tests/` and `.claude/skills/verify/`, as plain
-editable files that are useful with or without any agent installed.
+Result: `.claude/skills/run-tests/` and `.claude/skills/verify/`, plus
+`.claude/skills/run-a11y-checks/` when the repository already scripts its
+accessibility checks — plain editable files that are useful with or without
+any agent installed.
 
 ## 1. Probe, and write nothing yet
 
@@ -24,7 +26,8 @@ node <skill-dir>/scripts/probe.mjs <repo-dir>
 Detection is deterministic, so it lives in [scripts/probe.mjs](scripts/probe.mjs)
 rather than being re-derived by hand each time. It reports the stack it found,
 the evidence it found it from, the command it proposes for each reserved name,
-and whether either skill already exists.
+whether each skill already exists, and under `a11y` what it found for
+accessibility checks.
 
 ## 2. Show the user before writing
 
@@ -59,7 +62,8 @@ clean. Green then means *nothing was checked*, and every agent downstream
 believes it.
 
 This applies to every reserved skill the repository will end up with — the ones
-just written and the ones that were skipped.
+just written and the ones that were skipped. For `run-a11y-checks` the count is
+of pages, screens, or checks audited, and a known violation must come back red.
 
 Run each command and confirm two things:
 
@@ -75,7 +79,30 @@ command in the file. If it is wrong for a skipped one, say so plainly and ask
 before editing: it is someone's hand-written file, and being stale is a
 different problem from being wrong.
 
-## 5. Offer a pre-commit hook, if none guards commits yet
+## 5. Accessibility checks
+
+`run-a11y-checks` is optional, so its absence is an answer, not a gap. Act on
+the probe's `a11y.status`:
+
+- **`detected`** — the repository already scripts an audit. It was proposed in
+  step 2 and written in step 3 with the others; prove it in step 4. Never fold
+  it into `run-tests` or `verify`: it is the slow kind, and the gate must stay
+  fast enough that people run it.
+- **`tooling-without-script`** — an audit package is installed but nothing runs
+  it. Say what was found, and ask the user how they run it. Write the skill
+  only from the command they give. **Never compose one** from the package name.
+- **`none`** — if the repository has a UI, ask once whether they want
+  accessibility checks set up, naming the kind that fits its platform: a
+  real-browser axe audit for a web app, an on-device run for a mobile app, or
+  engine tests asserting sizes and focus for a game. Setting one up is new work
+  for the user to scope; this skill does not build it. If they decline, or
+  there is no UI, write nothing. Reviewers then review statically and say no
+  tooling ran.
+
+Accessibility tests already in the normal suite stay there and run through
+`run-tests`; this skill is only for what is too slow or environment-bound for it.
+
+## 6. Offer a pre-commit hook, if none guards commits yet
 
 A repository with no test-running commit hook lets a broken commit land
 whether or not anything upstream remembered to run `verify` first — that gap is
@@ -89,7 +116,7 @@ If a hook already runs tests, say so and stop here — do not add a second one.
 
 If none does, ask the user before writing anything: offer to add
 `.git/hooks/pre-commit` that runs this repository's `verify` command (from step
-3/4, generated or confirmed) and aborts the commit on a non-zero exit. Keep it
+3–4, generated or confirmed) and aborts the commit on a non-zero exit. Keep it
 to that one job — no formatting, no linting beyond what `verify` already does —
 and make it executable (`chmod +x`). If the repository already uses Husky or
 lefthook (a `.husky/` directory, a `lefthook.yml`), add the hook through that

@@ -151,3 +151,52 @@ test("generated skills satisfy the rules this repo enforces on skills", () => {
     );
   }
 });
+
+const withScripts = (scripts, extra = {}) => ({
+  "package.json": JSON.stringify({ scripts: { test: "vitest run", ...scripts }, ...extra }),
+  "pnpm-lock.yaml": "lockfileVersion: 9.0\n",
+});
+
+test("a stated accessibility script becomes run-a11y-checks, never part of run-tests", () => {
+  const dir = fixture(withScripts({ "audit:a11y": "node scripts/a11y-audit.mjs" }));
+  const plan = probe(dir, "--write");
+
+  assert.equal(plan.a11y.status, "detected");
+  assert.equal(plan.skills["run-a11y-checks"].command, "pnpm run audit:a11y");
+  assert.doesNotMatch(plan.skills["run-tests"].command, /a11y/, "the slow audit must stay out of the red-green loop");
+  assert.ok(plan.written.includes("run-a11y-checks"));
+
+  const fm = parseFrontmatter(readFileSync(join(dir, ".claude/skills/run-a11y-checks/SKILL.md"), "utf8"));
+  assert.equal(fm.name, "run-a11y-checks");
+  assert.equal(fm["disable-model-invocation"], "false", "a reserved name must stay invocable by agents");
+});
+
+test("only a script named for accessibility counts, not one that merely contains the letters", () => {
+  const named = probe(fixture(withScripts({ "test:accessibility": "x", a11y: "y" })));
+  assert.equal(named.skills["run-a11y-checks"].command, "pnpm run a11y && pnpm run test:accessibility");
+
+  const unrelated = probe(fixture(withScripts({ relabel: "x", "build:a11yish": "y" })));
+  assert.equal(unrelated.a11y.status, "none");
+  assert.equal(unrelated.skills["run-a11y-checks"], undefined);
+});
+
+test("audit tooling with no script to run it is reported, not wired up", () => {
+  // Composing the invocation would be inventing a command; the user knows it.
+  const dir = fixture(withScripts({}, { devDependencies: { "@axe-core/playwright": "^4" } }));
+  const plan = probe(dir, "--write");
+
+  assert.equal(plan.a11y.status, "tooling-without-script");
+  assert.match(plan.a11y.evidence, /@axe-core\/playwright/);
+  assert.equal(existsSync(join(dir, ".claude/skills/run-a11y-checks")), false);
+});
+
+test("a project with no accessibility tooling gets no run-a11y-checks, and says so", () => {
+  for (const files of [PNPM, GODOT]) {
+    const dir = fixture(files);
+    const plan = probe(dir, "--write");
+
+    assert.equal(plan.a11y.status, "none");
+    assert.ok(plan.a11y.evidence.length > 0, "must say what it looked for");
+    assert.equal(existsSync(join(dir, ".claude/skills/run-a11y-checks")), false);
+  }
+});
