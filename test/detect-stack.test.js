@@ -60,6 +60,19 @@ test("a Godot project that declares no engine version says so rather than assumi
   assert.equal(godot.evidence, "project.godot (engine version not declared)");
 });
 
+test("a React Native app is recognised from its dependency, with versions", () => {
+  const [rn] = detect(fixture({
+    "package.json": JSON.stringify({ dependencies: { expo: "~54.0.37", react: "19.1.0", "react-native": "0.81.5" } }),
+  })).stacks;
+  assert.equal(rn.skill, "react-native-conventions");
+  assert.equal(rn.evidence, "package.json depends on react-native 0.81.5, Expo ~54.0.37");
+});
+
+test("a React web app, even one using react-native-web, is not React Native", () => {
+  assert.deepEqual(stacksOf({ "package.json": JSON.stringify({ dependencies: { react: "^19", "react-dom": "^19" } }) }), []);
+  assert.deepEqual(stacksOf({ "package.json": JSON.stringify({ dependencies: { react: "^19", "react-native-web": "^0.21" } }) }), []);
+});
+
 test("a PHP project that is not Drupal matches no stack", () => {
   // composer.json alone is not evidence of Drupal — Laravel and Symfony have one too.
   assert.deepEqual(stacksOf({ "composer.json": JSON.stringify({ require: { "laravel/framework": "^11" } }) }), []);

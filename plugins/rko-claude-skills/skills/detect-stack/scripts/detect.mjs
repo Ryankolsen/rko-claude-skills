@@ -66,6 +66,28 @@ function detectGodot(dir) {
   return version ? `project.godot (engine ${version})` : "project.godot (engine version not declared)";
 }
 
+const npmDependencies = (dir) => {
+  try {
+    const manifest = JSON.parse(read(dir, "package.json") ?? "");
+    return { ...manifest.devDependencies, ...manifest.dependencies };
+  } catch {
+    return {};
+  }
+};
+
+/**
+ * A dependency on react-native itself, not on react or react-native-web: a
+ * web app shares React but none of the native accessibility props. Report the
+ * versions, since which props exist (role, aria-*) depends on them, and
+ * whether Expo manages the native projects.
+ */
+function detectReactNative(dir) {
+  const deps = npmDependencies(dir);
+  if (!deps["react-native"]) return null;
+  const expo = deps.expo ? `, Expo ${deps.expo}` : "";
+  return `package.json depends on react-native ${deps["react-native"]}${expo}`;
+}
+
 /**
  * Each entry names the stack, the skill that carries its rules, and how to
  * recognise it. Adding a stack means adding an entry here and a skill whose
@@ -74,6 +96,7 @@ function detectGodot(dir) {
 export const STACKS = [
   { stack: "drupal", skill: "drupal-conventions", detect: detectDrupal },
   { stack: "godot", skill: "godot-conventions", detect: detectGodot },
+  { stack: "react-native", skill: "react-native-conventions", detect: detectReactNative },
 ];
 
 export function detect(dir) {
