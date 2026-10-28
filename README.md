@@ -70,7 +70,7 @@ block.
 | `to-spec` | Turn the current conversation into a spec, with no interview |
 | `prd-to-plan` | Break a PRD into phased tracer-bullet slices as a GitHub issue |
 | `prd-to-issues` | Break a PRD into independently-grabbable GitHub issues |
-| `grill-me` | Interview about a plan in rounds until reaching shared understanding, recording new terms and ADRs as they settle |
+| `interview-me` | Interview about a plan in rounds until reaching shared understanding, recording new terms and ADRs as they settle |
 | `research` | Investigate a question against primary sources and write up the findings |
 
 ### Building

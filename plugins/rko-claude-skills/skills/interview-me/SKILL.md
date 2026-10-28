@@ -1,11 +1,11 @@
 ---
-name: grill-me
-description: Interview the user relentlessly about a plan or design, in rounds, until reaching shared understanding — challenging it against the project's recorded language and decisions, and writing new terms and ADRs into the repository as they settle. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me".
+name: interview-me
+description: Interview the user relentlessly about a plan or design, in rounds, until reaching shared understanding — challenging it against the project's recorded language and decisions, and writing new terms and ADRs into the repository as they settle. Use when user wants to stress-test a plan or be interviewed about a design, or mentions "interview me".
 domain: design-interrogation
 disable-model-invocation: true
 ---
 
-# Grill Me
+# Interview Me
 
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Treat the plan as a design tree: each decision, and the decisions that depend on it.
 

@@ -11,7 +11,7 @@ This skill will be invoked when the user wants to create a PRD. You should go th
 
 2. Explore the repo to verify their assertions and understand the current state of the codebase. Invoke the `detect-stack` skill first, and every stack skill it names — they say what to look at and which building blocks the stack offers.
 
-3. Invoke the `grill-me` skill to interview the user about the plan until you reach a shared understanding. It records new terms and ADRs as they settle; carry its summary of decisions into the PRD's Implementation Decisions, citing any ADR by number.
+3. Invoke the `interview-me` skill to interview the user about the plan until you reach a shared understanding. It records new terms and ADRs as they settle; carry its summary of decisions into the PRD's Implementation Decisions, citing any ADR by number.
 
 4. Sketch out the major modules you will need to build or modify to complete the implementation. Actively look for opportunities to extract deep modules that can be tested in isolation.
 
