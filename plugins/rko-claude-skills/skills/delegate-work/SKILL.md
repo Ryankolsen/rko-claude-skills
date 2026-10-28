@@ -10,8 +10,8 @@ disable-model-invocation: true
 
 You are the orchestrator. You hold the issues, the build order, the merge, and
 which verification run you are on; you write no code and run no gate yourself. The moment you
-start implementing you have stopped orchestrating. For work you intend to do in
-your own context, use the `do-work` skill instead.
+start implementing you have stopped orchestrating. Work meant for your own
+context belongs to `do-work` instead.
 
 The run has three stages, and verification happens **once, at the end**, not
 after every issue:

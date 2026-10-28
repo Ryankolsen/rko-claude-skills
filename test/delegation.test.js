@@ -28,3 +28,23 @@ test("every skill a delegation names is reserved or real", () => {
 
   assert.deepEqual([...new Set(unresolvable)].sort(), [], "a delegation must resolve");
 });
+
+// A workflow skill is absent from the Skill tool, so a delegation to one can
+// never be carried out. A workflow that needs another reads its file instead.
+test("no delegation names a workflow skill", () => {
+  const skills = loadSkills();
+  const workflows = new Set(
+    skills.filter((s) => s.frontmatter["disable-model-invocation"] === "true").map((s) => s.name),
+  );
+
+  const unreachable = [];
+  for (const skill of skills) {
+    for (const [, target] of skill.body.matchAll(DELEGATION)) {
+      if (workflows.has(target)) {
+        unreachable.push(`${skill.relativePath} delegates to the workflow skill \`${target}\`, which the Skill tool cannot start`);
+      }
+    }
+  }
+
+  assert.deepEqual([...new Set(unreachable)].sort(), [], "a delegation must name a model-invocable skill");
+});

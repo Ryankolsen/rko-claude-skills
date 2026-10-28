@@ -54,6 +54,8 @@ it is also the case that breaks `qa-verifier` outright.
 
 **An agent that needs a `true` skill names it and stops.** It does not reproduce the workflow by other means. A hand-rolled substitute is exactly what the flag exists to prevent: it yields output shaped like the skill's that was not made the way the skill makes it, and no one downstream can tell the difference. `qa-verifier` is the worked example — it cannot run `setup-project-skills`, so it names it as the remedy and leaves the decision with the user. Say which skill is needed and why; the user types it.
 
+**A workflow skill that needs another reads it and follows it.** A `true` skill runs only because the user typed it, so the user is present to answer the one it needs: `write-a-prd` reads `interview-me`'s file and runs the interview in the same conversation. This is the workflow itself, not a substitute, and it stays out of reach of subagents because the caller is out of reach too. Never phrase it as invoking the skill — the Skill tool cannot, and the validator rejects a delegation to a workflow skill.
+
 ## Fallback chain
 
 When a generic capability needs to run something and the reserved skill is absent, it works down this list. The order is the contract, and the last step is not optional.
