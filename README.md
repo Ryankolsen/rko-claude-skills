@@ -53,8 +53,9 @@ delegates to. The procedure lives in those skills.
 | `qa-verifier` | Run the verification gate and review the change for bugs and unmet criteria. Returns green, red, or blocked |
 | `standards-reviewer` | Check a diff against the repo's conventions and the existing code it should have reused |
 | `clean-code-reviewer` | Check a diff's new code for duplication, extractable logic, and Fowler code smells |
+| `accessibility-reviewer` | Check the UI a diff adds or alters for accessibility on any platform, with WCAG 2.2 AA as the web baseline |
 
-The three reviewers report without fixing anything, and only `qa-verifier` can
+The reviewers report without fixing anything, and only `qa-verifier` can
 block.
 
 ## Skills
@@ -94,8 +95,9 @@ block.
 
 | Skill | Description |
 |-------|-------------|
-| `code-review` | Review a diff on two axes: repo standards, and fidelity to the spec |
+| `code-review` | Review a diff on two axes, repo standards and fidelity to the spec, plus accessibility when it touches UI |
 | `commit-safety` *auto* | The checklist for whether a diff is safe to land: criteria, secrets, side effects |
+| `accessibility` *auto* | The checklist for whether a UI change is accessible on any platform, WCAG 2.2 AA on the web |
 | `commit-message` *auto* | Group pending changes into logical commits and write each message |
 | `resolving-merge-conflicts` *auto* | Resolve an in-progress merge or rebase conflict |
 | `git-guardrails-claude-code` | Hooks that block dangerous git commands before they execute |

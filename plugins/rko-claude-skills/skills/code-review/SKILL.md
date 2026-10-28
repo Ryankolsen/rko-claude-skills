@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs the reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs the reviews in parallel sub-agents, with an accessibility check when the diff could touch UI, and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 domain: code-review
 disable-model-invocation: true
 ---
@@ -10,7 +10,7 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 - **Standards**: does the code conform to this repo's documented coding standards?
 - **Spec**: does the code faithfully implement the originating issue / spec?
 
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
+An accessibility check runs alongside them whenever the diff could touch UI. All of them run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
 **Locating the issue tracker.** If `docs/agents/issue-tracker.md` exists, follow it. Otherwise detect the tracker rather than blocking: check the git remote and whether `gh` is authenticated for a GitHub repo, or `glab` for GitLab. If neither resolves, ask the user where the spec lives. Never guess an issue URL scheme.
 
@@ -76,11 +76,13 @@ If those agents are unavailable, spawn one plain sub-agent with the same inputs,
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
+**Accessibility** runs as `accessibility-reviewer`, spawned in the same message. Give it the fixed point, the diff command and the commit list. Skip it only when every changed file is documentation, a migration, CI or build config, a lockfile, or a test — UI is not identifiable by extension, so anything else means spawn it — and say so in the final report. If the agent is unavailable, note that accessibility was not reviewed; do not improvise it.
+
 ### 5. Aggregate
 
-Present the reports under `## Standards` (the two Standards agents' reports, one after the other) and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
+Present the reports under `## Standards` (the two Standards agents' reports, one after the other) and `## Spec` headings, then `## Accessibility` when it ran, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
 
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
+End with a one-line summary: total findings per axis (accessibility counts as its own), and the worst issue _within each axis_ (if any). Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
 
 ## Why two axes
 

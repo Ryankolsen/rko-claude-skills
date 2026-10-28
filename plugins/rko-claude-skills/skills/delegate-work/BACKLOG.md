@@ -81,8 +81,8 @@ so a watching user sees progress. At the end:
 - **Tickets opened** — each new issue, the original it came from, and what it
   says is still wrong.
 - **Why the run stopped** — which condition fired.
-- **Cleanup ticket** — the issue opened from `standards-reviewer` and
-  `clean-code-reviewer`'s findings, or that there was nothing to file. None of
+- **Cleanup ticket** — the issue opened from `standards-reviewer`,
+  `clean-code-reviewer` and `accessibility-reviewer`'s findings, or that there was nothing to file. None of
   them re-entered any loop.
 - **State of the branch** — the base SHA, the commits added since, that none are
   pushed, and whether they passed verification. If the run ended red, say the

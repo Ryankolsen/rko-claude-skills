@@ -1,6 +1,6 @@
 ---
 name: delegate-work
-description: Orchestrate the agents against one issue or a queue of them — developers build every issue, in parallel worktrees where the issues are independent, the results merge into the current branch, then a three-agent QA review judges the whole run once; bugs get a single fix pass and one re-check, whatever still fails becomes a new ticket, and standards and clean-code findings go into one cleanup ticket. Use when the user wants an issue or plan phase implemented by subagents rather than in the main thread, wants a backlog worked through unattended, or asks to run the agents on a queue. Keeps the main thread holding the plan instead of the implementation.
+description: Orchestrate the agents against one issue or a queue of them — developers build every issue, in parallel worktrees where the issues are independent, the results merge into the current branch, then a QA review of up to four agents judges the whole run once; bugs get a single fix pass and one re-check, whatever still fails becomes a new ticket, and standards, clean-code and accessibility findings go into one cleanup ticket. Use when the user wants an issue or plan phase implemented by subagents rather than in the main thread, wants a backlog worked through unattended, or asks to run the agents on a queue. Keeps the main thread holding the plan instead of the implementation.
 argument-hint: "An issue URL to work that issue, or a number to work that many"
 domain: work-orchestration
 disable-model-invocation: true
@@ -19,10 +19,10 @@ after every issue:
 1. **Build** — a `developer` per issue, in parallel worktrees wherever issues
    do not depend on each other.
 2. **Merge** — every built branch into the current branch.
-3. **Verify** — three read-only QA reviewers over everything the run added.
+3. **Verify** — read-only QA reviewers over everything the run added.
    Only bugs block: on red, one fix pass and a second check, then anything still
-   failing is ticketed. Standards and clean-code findings never block; they go
-   into one cleanup ticket.
+   failing is ticketed. Standards, clean-code and accessibility findings never
+   block; they go into one cleanup ticket.
 
 Checking each issue in isolation paid for a full gate per issue and still could
 not see what only shows up once the issues meet. One gate over the merged
@@ -37,8 +37,8 @@ result checks the thing that will actually be pushed.
   one to confirm before building — say who opened it and wait. In queue mode
   this is a hard filter, not a question; see [BACKLOG.md](BACKLOG.md).
 - **The `developer` and `qa-verifier` agents.** Without them, say so and stop.
-  `standards-reviewer` and `clean-code-reviewer` are wanted too; if either is
-  missing, say so and run the QA review without it — they never block, so a
+  `standards-reviewer`, `clean-code-reviewer` and `accessibility-reviewer` are
+  wanted too; if any is missing, say so and run the QA review without it — they never block, so a
   missing one costs the cleanup ticket its findings, not the run its verdict.
 - **A clean tree**, or the user's word that existing changes are the baseline.
   You cannot attribute a failure you inherited, and worktrees branch from
@@ -152,9 +152,9 @@ unmerged branch, so this only ever deletes work that is already on yours.
 
 ## Verify
 
-When every wave has merged, spawn the QA review: **three agents, in one
-message**, so they run at once. All three are read-only, so unlike developers
-they can safely share the tree. Each looks at a different thing, so their
+When every wave has merged, spawn the QA review: **every agent below, in one
+message**, so they run at once. All are read-only, so unlike developers they
+can safely share the tree. Each looks at a different thing, so their
 findings do not overlap:
 
 | Agent | Looks at | Its findings |
@@ -162,19 +162,28 @@ findings do not overlap:
 | `qa-verifier` | Correctness: runs the gate, then bugs, side effects, unmet criteria, secrets | **Blocking.** It owns the verdict. |
 | `standards-reviewer` | The change against the codebase: documented conventions, existing code it should have reused | Advisory → cleanup ticket |
 | `clean-code-reviewer` | The change on its own: duplication, functions worth extracting, code smells | Advisory → cleanup ticket |
+| `accessibility-reviewer` | The UI the change adds or alters: whether everyone can perceive and operate it | Advisory → cleanup ticket |
+
+**Skip `accessibility-reviewer` when nothing the run changed could be UI** —
+every changed file is documentation, a migration, CI or build config, a
+lockfile, or a test. Decide it from `git diff --name-only <base>..HEAD`, and
+skip only on that list: UI is not identifiable by extension (a game engine's
+UI lives in ordinary scripts), so any other file means spawn it, and it says
+`no UI in this diff` itself if there is none. Say in the report that it was
+skipped and why.
 
 Never accept a developer's account of whether its work is correct; only
 `qa-verifier` decides green.
 
-Pass all three **the range `<base>..HEAD`** as the change under review — the
+Pass every reviewer **the range `<base>..HEAD`** as the change under review — the
 work is committed now, not sitting dirty, so say so plainly or they will review
 an empty diff — and the issue numbers and titles in scope. Give `qa-verifier`
 also **each issue's acceptance criteria verbatim**, grouped under the issue
 number — not a summary. They are the bar it checks the diff against in both
 directions; summarised, they lose the specific values that make them checkable.
 
-Keep the two advisory reports for *The cleanup ticket*; neither is ever sent to
-a developer. Only the first verification run spawns them — the fix pass changes
+Keep the advisory reports for *The cleanup ticket*; none is ever sent to a
+developer. Only the first verification run spawns them — the fix pass changes
 little, and re-reviewing style on it is spent twice.
 
 **There are at most two verification runs per delegate-work run**: this one,
@@ -191,7 +200,7 @@ Then:
   gate, and none the fallback chain could resolve — so this is a decision for
   the user (invoke `setup-project-skills`, or say to proceed without a gate),
   not a defect for a developer. Forward any review findings it still returned,
-  and the two advisory reports.
+  and the advisory reports.
 - **Green** → go to *On green*.
 - **Red on the first run** → go to *The fix pass*.
 - **Red on the second run** → go to *Ticketing what remains*.
@@ -295,7 +304,7 @@ it cannot know which run it is.
 ## The cleanup ticket
 
 Once verification has finished — green, or red with the bugs ticketed — turn
-the two advisory reports into **one** issue for the whole run, so the findings
+the advisory reports into **one** issue for the whole run, so the findings
 survive past your terminal without ever interrupting a build:
 
 - **Only findings on code this run added**, at `high` or `medium` confidence as
@@ -304,14 +313,14 @@ survive past your terminal without ever interrupting a build:
 - **Title** — `Cleanup after #<first>–#<last>` or similar; it names the run, not
   one issue.
 - **Body** — a link to each issue in the run, then the findings grouped by
-  reviewer (*Standards* and *Clean code*) as they returned them: `path:line`,
+  reviewer (*Standards*, *Clean code* and *Accessibility*) as they returned them: `path:line`,
   the finding, the fix direction. Never a diff.
 - **Label `hitl`.** A cleanup is a judgement call about design — which
   duplicate becomes the shared function, which convention wins — and that
   is a person's decision, not an unattended run's.
 - Opened as the user, as with bug tickets.
 
-If neither reviewer returned anything worth keeping, open nothing and say so.
+If no reviewer returned anything worth keeping, open nothing and say so.
 Do not file it on a bail: the user is about to look at the branch anyway, so
 the findings go in the bail report instead.
 
@@ -360,7 +369,7 @@ skill was rewritten to remove.
 survives the second run is ticketed; if the user wants another pass, they can
 ask for one with the evidence in front of them.
 
-**Do not send a standards or clean-code finding to a developer.** They are
+**Do not send a standards, clean-code or accessibility finding to a developer.** They are
 advisory by design; acting on them mid-run spends a fix pass on taste and grows
 the diff the second verification has to judge. They go in the cleanup ticket.
 
