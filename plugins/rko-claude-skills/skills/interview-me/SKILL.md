@@ -55,7 +55,7 @@ Each round of answers reshapes the tree: settled decisions unblock the questions
 
 ## Write it down as it settles
 
-When a term is sharpened or a decision is made, invoke the `domain-modeling` skill and record it right away; don't batch to the end:
+When a term is sharpened or a decision is made, invoke the `domain-modeling` skill and record it as soon as I answer that question, not when the round or the interview ends:
 
 - **Terms** go into `CONTEXT.md` or `docs/Glossary.md`.
 - **Decisions** become an ADR only when they pass the skill's three-part bar: hard to reverse, surprising without context, a real trade-off. Most won't. A decision that reverses an accepted ADR always gets a new ADR, and the old one is marked superseded.

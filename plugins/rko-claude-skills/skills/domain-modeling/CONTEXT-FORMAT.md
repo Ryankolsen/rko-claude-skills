@@ -32,8 +32,8 @@ _Avoid_: Client, buyer, account
 Every other term: [docs/Glossary.md](docs/Glossary.md).
 ```
 
-- **Parts** is optional: the few pieces of the domain and how they relate, one line each. Drop it when the context has only one part.
-- **Core terms** are the ones a newcomer needs before anything else makes sense, about ten at most.
+- **Parts** is optional: the few pieces of the domain and how they relate, one line each. It describes relationships and never defines a term; a term it mentions is defined once, under Core terms or in the glossary. Drop it when the context has only one part.
+- **Core terms** are the ones a newcomer needs before anything else makes sense. About six fit under the cap beside the description and Parts.
 - When the file passes 40 lines, move the least central core terms to the glossary. Don't let the cap bend.
 
 ## docs/Glossary.md
@@ -60,6 +60,7 @@ _Avoid_: Refund, reversal
 - **A term earns an entry only if it passes the `_Avoid_` test.** Either there is a wrong word a person or an agent would plausibly reach for instead (it goes under `_Avoid_`), or the term means something narrower here than in everyday use. If plain English would do, leave it out.
 - **Prune unused terms.** Whenever you edit either file, search the repository for each entry's term outside these two files; delete the entries nothing uses any more.
 - **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others under `_Avoid_`.
+- **Never list an `_Avoid_` word the project already uses correctly for something else.** Readers treat `_Avoid_` words as banned, so listing "issue" under a finding makes every tracker issue look like a mistake. Search the repository for each word before listing it. An entry earned by a narrower meaning, with no wrong word to avoid, has no `_Avoid_` line.
 - **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
 - **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
 
