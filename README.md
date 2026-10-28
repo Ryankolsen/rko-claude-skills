@@ -108,6 +108,7 @@ block.
 |-------|-------------|
 | `detect-stack` *auto* | Detect the repository's stack from evidence and name the stack skills that apply |
 | `drupal-conventions` *auto* | Drupal fields and Views via config YAML, Twig and preprocess, Composer patches, cache metadata |
+| `godot-conventions` *auto* | Godot 4 UI and its accessibility, Control focus and modal input, headless GUT tests and the class_name cache |
 
 ### Meta
 
